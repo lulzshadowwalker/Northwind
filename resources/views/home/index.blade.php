@@ -60,7 +60,7 @@
         @foreach ($collections as $collection)
             <section id="{{ $collection->slug }}" class="mb-16 last:mb-0">
                 <header class="mb-8">
-                    <h3 class="text-3xl lg:text-4xl font-light tracking-wide mb-2 _font-zain">{{ $collection->name }}
+                    <h3 class="text-2xl md:text-3xl font-semibold tracking-wide mb-2 _font-zain">{{ $collection->name }}
                     </h3>
                     <p class="text-lg text-base-content/70">{{ $collection->description }}</p>
                 </header>

@@ -1,5 +1,5 @@
 @props(['collections'])
-<header class="navbar bg-base-100 container mx-auto px-4 2xl:!max-w-395 flex justify-between md:block">
+<header class="navbar bg-base-100 container mx-auto px-4 2xl:!max-w-395 flex justify-between">
     <!-- Mobile Menu Toggle -->
     <div class="flex-none md:hidden">
         <div class="flex items-center gap-2">

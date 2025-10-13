@@ -68,7 +68,6 @@ html[lang="en"] body {
 html[lang="ar"] ._font-zain {
     font-family: "Zain", sans-serif;
     font-optical-sizing: auto;
-    font-weight: 400;
 }
 
 html[lang="en"] ._font-zain {
