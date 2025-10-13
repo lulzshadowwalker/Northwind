@@ -5,14 +5,15 @@
             <p class="text-lg text-base-content/70">{{ __('app.discover-collection') }}</p>
         </header>
 
-        <div class="mb-8 flex justify-between items-center">
+        <div class="mb-8 flex flex-col gap-4 items-start md:gap-0 md:flex-row md:justify-between md:items-center">
             <form action="{{ route('products.index', ['language' => app()->getLocale()]) }}" method="GET"
                 class="flex items-center gap-2">
-                <div class="form-control">
-                    <input type="text" name="search" placeholder="{{ __('app.search-by-name') }}"
-                        class="input input-bordered input-accent w-full max-w-xs" value="{{ request('search') }}">
+                <div class="join">
+                    <input type="search" role="search" name="search" placeholder="{{ __('app.search-by-name') }}"
+                        class="join-item input input-bordered input-primary w-full max-w-xs" value="{{ request('search') }}">
+
+                        <button type="submit" class="join-item btn btn-primary">{{ __('app.search') }}</button>
                 </div>
-                <button type="submit" class="btn btn-accent">{{ __('app.search') }}</button>
             </form>
 
             <form action="{{ route('products.index', ['language' => app()->getLocale()]) }}" method="GET">
