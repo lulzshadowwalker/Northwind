@@ -14,7 +14,8 @@
             <a href="{{ route('terms.index', ['language' => app()->getLocale()]) }}"
                 class="link link-hover">{{ __('app.terms-and-conditions') }}</a>
             <a href="{{ route('return-policy.index', ['language' => app()->getLocale()]) }}"
-                class="link link-hover">{{ __('app.return-policy') }}</a>
+                class="link link-hover">{{ __('app.return-policy') }}
+            </a>
         </nav>
 
         <nav>
@@ -44,9 +45,10 @@
 <div class="bg-base-200 border-base-300 border-t">
     <footer class="footer text-base-content container mx-auto px-10 py-4">
         <aside class="grid-flow-col items-center gap-4">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="Northwind Logo" class="h-14 w-14">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Northwind Logo" class="h-14 min-w-14">
             <div>
-                <p>
+                {{-- no wrap --}}
+                <p class="whitespace-nowrap">
                     © {{ date('Y') }} {{ __('app.northwind') }}. {{ __('app.all-rights-reserved') }}
                 </p>
                 <p>
