@@ -66,7 +66,7 @@
                 </header>
 
                 @if ($collection->products->isNotEmpty())
-                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 overflow-hidden">
                         @foreach ($collection->products as $product)
                             <x-product-card :product="$product" :collection="$collection" :cart="$cart" />
                         @endforeach
