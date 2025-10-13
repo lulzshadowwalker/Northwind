@@ -1,19 +1,9 @@
 @props(['collections'])
-<header class="navbar bg-base-100 container mx-auto px-4 2xl:!max-w-395">
-    <div class="flex-1 min-w-0">
-        <a href="{{ route('home.index', ['language' => app()->getLocale()]) }}"
-            class="btn btn-ghost justify-start p-0 md:px-4">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="Northwind Logo" class="h-8 md:h-12">
-            <span class="text-lg md:text-xl font-semibold hidden sm:inline">{{ __('app.northwind') }}</span>
-        </a>
-    </div>
-
+<header class="navbar bg-base-100 container mx-auto px-4 2xl:!max-w-395 flex justify-between md:block">
     <!-- Mobile Menu Toggle -->
     <div class="flex-none md:hidden">
-        <div class="flex items-center gap-2 justify-end">
-            <a href="#collections" class="btn btn-primary shadow-lg">{{ __('app.get-started') }}</a>
-
-            <div class="dropdown dropdown-end">
+        <div class="flex items-center gap-2">
+            <div class="dropdown dropdown-start">
                 <div tabindex="0" role="button" class="btn btn-square btn-ghost">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         class="inline-block w-5 h-5 stroke-current">
@@ -113,7 +103,18 @@
                     @endif
                 </ul>
             </div>
+
+            <a href="#collections" class="btn btn-primary btn-md px-7 shadow-lg">{{ __('app.get-started') }}</a>
         </div>
+    </div>
+
+    <!-- Logo -->
+    <div class="min-w-0">
+        <a href="{{ route('home.index', ['language' => app()->getLocale()]) }}"
+            class="btn btn-ghost justify-start p-0 md:px-4">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Northwind Logo" class="h-14">
+            <span class="text-lg md:text-xl font-semibold hidden sm:inline">{{ __('app.northwind') }}</span>
+        </a>
     </div>
 
     <!-- Desktop Menu -->
