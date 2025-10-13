@@ -283,20 +283,21 @@
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <div class="flex items-center gap-3">
-                                            <h4 class="font-medium text-gray-800">{{ $review->customer->user->name }}
-                                            </h4>
-                                            <div class="rating rating-sm">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <input type="radio" class="mask mask-star-2 bg-orange-400"
-                                                        {{ $i <= $review->rating ? 'checked' : '' }} disabled />
-                                                @endfor
-                                            </div>
+                                    <div class="flex flex-col items-start gap-2 md:flex-row md:items-center justify-between mb-2">
+                                        <div class="flex flex-col items-start md:flex-row md:items-center gap-2">
+                                            <h4 class="font-medium text-gray-800">{{ $review->customer->user->name }}</h4>
+
+                                            <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
                                         </div>
-                                        <span
-                                            class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+
+                                        <div class="rating rating-sm">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <input type="radio" class="mask mask-star-2 bg-orange-400"
+                                                    {{ $i <= $review->rating ? 'checked' : '' }} disabled />
+                                            @endfor
+                                        </div>
                                     </div>
+
                                     <p class="text-gray-700 leading-relaxed">{{ $review->content }}</p>
                                 </div>
                             </div>
