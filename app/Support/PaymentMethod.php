@@ -30,14 +30,42 @@ class PaymentMethod
             $data = (array) $data;
         }
 
-        $paymentMethod = new self;
-        $paymentMethod->id = $data['PaymentMethodId'];
-        $paymentMethod->name = Language::tryFrom(app()->getLocale()) === Language::ar ? $data['PaymentMethodAr'] : $data['PaymentMethodEn'];
-        $paymentMethod->code = $data['PaymentMethodCode'];
-        $paymentMethod->serviceCharge = Money::of($data['ServiceCharge'], $data['CurrencyIso'], roundingMode: RoundingMode::HALF_UP);
-        $paymentMethod->total = Money::of($data['TotalAmount'], $data['CurrencyIso'], roundingMode: RoundingMode::HALF_UP);
-        $paymentMethod->image = $data['ImageUrl'];
+        $paymentMethod = new self();
+        $paymentMethod->id = $data["PaymentMethodId"];
+        $paymentMethod->name =
+            Language::tryFrom(app()->getLocale()) === Language::ar
+                ? $data["PaymentMethodAr"]
+                : $data["PaymentMethodEn"];
+        $paymentMethod->code = $data["PaymentMethodCode"];
+        $paymentMethod->serviceCharge = Money::of(
+            $data["ServiceCharge"],
+            $data["CurrencyIso"],
+            roundingMode: RoundingMode::HALF_UP,
+        );
+        $paymentMethod->total = Money::of(
+            $data["TotalAmount"],
+            $data["CurrencyIso"],
+            roundingMode: RoundingMode::HALF_UP,
+        );
+        $paymentMethod->image = $data["ImageUrl"];
 
         return $paymentMethod;
+    }
+
+    /**
+     * Creates a new instance of PaymentMethod for Tabby.
+     */
+    public static function tabby(Money $price): self
+    {
+        $self = new self();
+        $self->id = "tabby";
+        $self->name = "Pay later with Tabby";
+        $self->code = "tabby";
+        $self->serviceCharge = Money::of(0, $price->getCurrency());
+        $self->total = $price;
+        $self->image =
+            "https://www.pfgrowth.com/wp-content/uploads/2023/03/tabby-logo-1.png";
+
+        return $self;
     }
 }

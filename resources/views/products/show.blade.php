@@ -153,6 +153,9 @@
                             </form>
                         </div>
 
+                        <!-- Tabby Promo Snippet -->
+                        <div id="TabbyPromo" class="mb-4"></div>
+
                         <div class="flex items-center gap-4">
                             <img src="{{ asset('assets/images/tabby.png') }}" alt="Tabby Logo" class="h-5" />
                             <img src="{{ asset('assets/images/tamara.png') }}" alt="Tamara Logo"
@@ -369,7 +372,20 @@
         </div>
     </div>
 
+    <!-- Tabby Promo Script -->
+    <script src="https://checkout.tabby.ai/tabby-promo.js"></script>
     <script>
+        // Initialize Tabby Promo
+        new TabbyPromo({
+            selector: '#TabbyPromo',
+            currency: 'SAR', // Change to AED for UAE, KWD for Kuwait
+            price: '{{ number_format($product->price->getAmount()->toFloat(), 2, '.', '') }}',
+            lang: '{{ app()->getLocale() === "ar" ? "ar" : "en" }}',
+            source: 'product',
+            publicKey: '{{ config("services.tabby.public_key") }}',
+            merchantCode: '{{ config("services.tabby.merchant_code", "NWSA") }}'
+        });
+
         function productGallery() {
             const productName = '{{ $product->name }}';
             const images = @json(

@@ -9,19 +9,22 @@ use Closure;
 
 enum PaymentGateway: string
 {
-    case myfatoorah = 'myfatoorah';
+    case myfatoorah = "myfatoorah";
+    case tabby = "tabby";
 
     public function label(): string
     {
         return match ($this) {
-            self::myfatoorah => 'MyFatoorah',
+            self::myfatoorah => "MyFatoorah",
+            self::tabby => "Tabby",
         };
     }
 
     public function icons(): string
     {
         return match ($this) {
-            self::myfatoorah => 'heroicon-o-credit-card',
+            self::myfatoorah => "heroicon-o-credit-card",
+            self::tabby => "heroicon-o-credit-card",
         };
     }
 
@@ -34,6 +37,6 @@ enum PaymentGateway: string
 
     public static function values(): array
     {
-        return array_map(fn ($e) => $e->value, self::cases());
+        return array_map(fn($e) => $e->value, self::cases());
     }
 }

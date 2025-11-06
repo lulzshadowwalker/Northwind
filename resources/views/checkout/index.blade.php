@@ -117,17 +117,21 @@
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
 
                                 @if(isset($paymentMethods) && count($paymentMethods) > 0)
+                                    <div id="eligibility-status" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 hidden">
+                                        Checking Tabby eligibility...
+                                    </div>
                                     <div class="space-y-3">
                                         @foreach($paymentMethods as $method)
                                             <label
-                                                class="flex items-center justify-between p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-base-100 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                                class="flex items-center justify-between p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-base-100 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 {{ $method->id === 'tabby' ? 'tabby-payment-method' : '' }}"
+                                                {{ $method->id === 'tabby' ? 'id="tabby-payment-label"' : '' }}>
                                                 <div class="flex items-center space-x-4">
                                                     <input type="radio"
                                                            x-model="paymentMethod"
                                                            name="payment_method"
                                                            value="{{ $method->id }}"
                                                            class="radio radio-primary"
-                                                        {{ $loop->first ? 'checked' : '' }}>
+                                                           {{ $loop->first ? 'checked' : '' }}>
 
                                                     <div class="flex items-center space-x-3">
                                                         @if($method->image)
@@ -167,6 +171,11 @@
                                                     @endif
                                                 </div>
                                             </label>
+                                            @if($method->id === 'tabby')
+                                                <div id="tabby-rejection-message" class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 hidden">
+                                                    Sorry, Tabby is unable to approve this purchase. Please use an alternative payment method for your order.
+                                                </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @else
@@ -221,6 +230,116 @@
                                 }
                             });
                         });
+
+                        // Tabby eligibility check
+                        const emailInput = document.getElementById('email');
+                        const phoneInput = document.getElementById('phone');
+                        const nameInput = document.getElementById('name');
+                        const eligibilityStatus = document.getElementById('eligibility-status');
+                        const tabbyLabel = document.getElementById('tabby-payment-label');
+                        const tabbyRadio = document.querySelector('input[value="tabby"]');
+                        const rejectionMessage = document.getElementById('tabby-rejection-message');
+
+                        let eligibilityCheckTimeout;
+
+                        // Initially enable Tabby for testing
+                        tabbyRadio.disabled = false;
+                        tabbyLabel.classList.remove('opacity-50', 'pointer-events-none');
+
+                        function checkTabbyEligibility() {
+                            const email = emailInput.value.trim();
+                            const phone = phoneInput.value.trim();
+                            const name = nameInput.value.trim();
+
+                            if (!email || !phone || !name) {
+                                console.log('Tabby: Fields not filled, skipping check');
+                                return;
+                            }
+
+                            console.log('Tabby: Checking eligibility for', email, phone);
+
+                            // Show checking status
+                            eligibilityStatus.textContent = 'Checking Tabby eligibility...';
+                            eligibilityStatus.className = 'mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700';
+                            eligibilityStatus.classList.remove('hidden');
+
+                            // Calculate total from cart (assuming it's available)
+                            const total = {{ $cart->total->getAmount()->toFloat() }};
+
+                            fetch('{{ route("checkout.tabby-eligibility", ["language" => app()->getLocale()]) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    amount: total,
+                                    currency: '{{ $cart->total->getCurrency()->getCurrencyCode() }}',
+                                    buyer: {
+                                        email: email,
+                                        phone: phone,
+                                        name: name
+                                    }
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Tabby: Eligibility response', data);
+                                eligibilityStatus.classList.add('hidden');
+
+                                if (data.eligible) {
+                                    console.log('Tabby: Eligible, keeping enabled');
+                                    // Keep Tabby enabled
+                                    tabbyLabel.classList.remove('opacity-50', 'pointer-events-none');
+                                    tabbyRadio.disabled = false;
+                                    rejectionMessage.classList.add('hidden');
+                                } else {
+                                    console.log('Tabby: Not eligible, disabling');
+                                    // Hide/disable Tabby
+                                    tabbyLabel.classList.add('opacity-50', 'pointer-events-none');
+                                    tabbyRadio.disabled = true;
+                                    tabbyRadio.checked = false;
+                                    rejectionMessage.classList.remove('hidden');
+
+                                    // Select first available method
+                                    const availableRadio = document.querySelector('input[name="payment_method"]:not([disabled])');
+                                    if (availableRadio) {
+                                        availableRadio.checked = true;
+                                        paymentMethod = availableRadio.value;
+                                    }
+
+                                    // Update rejection message
+                                    let message = 'Sorry, Tabby is unable to approve this purchase. Please use an alternative payment method for your order.';
+                                    if (data.reason === 'order_amount_too_high') {
+                                        message = 'This purchase is above your current spending limit with Tabby, try a smaller cart or use another payment method.';
+                                    } else if (data.reason === 'order_amount_too_low') {
+                                        message = 'The purchase amount is below the minimum amount required to use Tabby, try adding more items or use another payment method.';
+                                    }
+                                    rejectionMessage.textContent = message;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Eligibility check failed:', error);
+                                eligibilityStatus.textContent = 'Failed to check Tabby eligibility. Please try again.';
+                                eligibilityStatus.className = 'mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700';
+                                setTimeout(() => eligibilityStatus.classList.add('hidden'), 3000);
+                            });
+                        }
+
+                        // Debounced eligibility check
+                        function debounceEligibilityCheck() {
+                            clearTimeout(eligibilityCheckTimeout);
+                            eligibilityCheckTimeout = setTimeout(checkTabbyEligibility, 1000);
+                        }
+
+                        emailInput.addEventListener('input', debounceEligibilityCheck);
+                        phoneInput.addEventListener('input', debounceEligibilityCheck);
+                        nameInput.addEventListener('input', debounceEligibilityCheck);
+
+                        // Initial check if fields are filled
+                        if (emailInput.value && phoneInput.value && nameInput.value) {
+                            checkTabbyEligibility();
+                        }
                     });
                 </script>
 

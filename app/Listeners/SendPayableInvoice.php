@@ -22,12 +22,18 @@ class SendPayableInvoice implements ShouldQueue
 
             $invoice = $payment->invoice()->create();
 
-            $html = view('invoices.show', compact('invoice'))->render();
+            $html = view("invoices.show", compact("invoice"))->render();
 
-            if (! app()->environment('testing')) {
+            if (!app()->environment("testing")) {
                 Browsershot::html($html)
                     ->showBackground()
                     ->save($invoice->filepath());
+            }
+
+            // Clear the customer's cart after successful payment
+            $customer = $payment->payable->customer;
+            if ($customer && $customer->cart) {
+                $customer->cart->cartItems()->delete();
             }
 
             $payment->payable->payer()->notify(new InvoicePaid($invoice));
