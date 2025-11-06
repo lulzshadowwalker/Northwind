@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\PaymentGatewayService;
+use App\Enums\PaymentStatus;
 use App\Http\Requests\StorePaymentRequest;
 use Exception;
 use Illuminate\Http\Request;
@@ -35,6 +36,10 @@ class PaymentController extends Controller
     {
         try {
             $payment = $this->gateway->callback($request);
+
+            if ($payment->status === PaymentStatus::failed) {
+                throw new Exception("failed to process payment");
+            }
 
             $language = $request->language ?? (app()->getLocale() ?? "en");
 
