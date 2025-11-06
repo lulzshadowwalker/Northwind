@@ -110,8 +110,8 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
                     ->getCurrency()
                     ->getCurrencyCode(),
                 "buyer" => [
-                    "phone" => "+966500000001", // $phone,
-                    "email" => "otp.success@tabby.ai", // $user->email,
+                    "phone" => $phone,
+                    "email" => $user->email,
                     "name" => $user->fullName,
                     "dob" => "1990-01-01", // Default DOB, can be updated
                 ],
