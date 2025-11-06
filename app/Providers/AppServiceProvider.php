@@ -36,8 +36,8 @@ class AppServiceProvider extends ServiceProvider
             return true;
         });
 
-        if (!app()->environment("testing")) {
-            auth()->login(\App\Models\Customer::first()->user);
-        }
+        // if (!app()->environment("testing")) {
+        //     auth()->login(\App\Models\Customer::first()->user);
+        // }
     }
 }

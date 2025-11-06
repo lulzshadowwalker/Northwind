@@ -54,6 +54,13 @@
         <div class="absolute bottom-10 right-10 w-40 h-40 bg-primary/3 rounded-full blur-3xl"></div>
     </section>
 
+    <!-- Tabby Test Login -->
+    <div style="position: fixed; bottom: 10px; left: 10px; z-index: 50; display: flex; flex-direction: column; gap: 0.8rem;">
+        <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'success') }}">Login as Tabby Success User</a>
+        <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'rejected') }}">Login as Tabby Rejected User</a>
+        <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'reject-phone') }}">Login as Tabby Pre-scoring Rejected User</a>
+    </div>
+
     {{-- Collections --}}
     <section id="collections" class="container mx-auto px-4 my-12 max-md:my-8">
         <h2 class="sr-only">{{ __('app.our-collections') }}</h2>

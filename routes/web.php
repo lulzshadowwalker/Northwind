@@ -131,3 +131,55 @@ Route::post("/payments", [PaymentController::class, "store"])
 Route::get("/payments/callback", [PaymentController::class, "callback"])->name(
     "payments.callback",
 );
+
+// Test login routes for Tabby testing
+Route::get("/test-login/{type}", function ($type) {
+    $phoneMap = [
+        "success" => "+966500000001",
+        "rejected" => "+966500000001",
+        "reject-phone" => "+966500000002",
+    ];
+
+    $emails = [
+        "success" => "otp.success@tabby.ai",
+        "rejected" => "otp.rejected@tabby.ai",
+        "reject-phone" => "otp.success@tabby.ai",
+    ];
+
+    if (!isset($emails[$type])) {
+        abort(404);
+    }
+
+    $user = \App\Models\User::where("email", $emails[$type])->first();
+    if (!$user) {
+        abort(
+            404,
+            "Test user not found. Run: php artisan db:seed --class=TabbyTestUsersSeeder",
+        );
+    }
+
+    // Check if another user has this phone number
+    $targetPhone = $phoneMap[$type];
+    $existingUser = \App\Models\User::where("phone", $targetPhone)
+        ->where("id", "!=", $user->id)
+        ->first();
+
+    if ($existingUser) {
+        // Generate random phone number for the other user
+        do {
+            $randomPhone = "+96650000" . rand(1000, 9999);
+        } while (\App\Models\User::where("phone", $randomPhone)->exists());
+
+        $existingUser->update(["phone" => $randomPhone]);
+    }
+
+    // Update phone number dynamically for testing
+    $user->update(["phone" => $targetPhone]);
+
+    auth()->login($user);
+
+    return redirect("/en")->with(
+        "success",
+        "Logged in as Tabby test user: {$user->name}",
+    );
+})->name("test-login");

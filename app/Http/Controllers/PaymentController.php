@@ -36,21 +36,23 @@ class PaymentController extends Controller
         try {
             $payment = $this->gateway->callback($request);
 
-            $language = $request->language ?? app()->getLocale() ?? 'en';
+            $language = $request->language ?? (app()->getLocale() ?? "en");
 
-            return redirect()->route('home.index', ['language' => $language])
-                ->with('success', __('app.thank-you-for-your-order'))
-                ->with('payment', $payment);
+            return redirect()
+                ->route("home.index", ["language" => $language])
+                ->with("success", __("app.thank-you-for-your-order"))
+                ->with("payment", $payment);
         } catch (Exception $e) {
-            Log::emergency('Payment callback error: '.$e->getMessage(), [
-                'request' => $request->all(),
-                'exception' => $e,
+            Log::emergency("Payment callback error: " . $e->getMessage(), [
+                "request" => $request->all(),
+                "exception" => $e,
             ]);
 
-            $language = $request->language ?? app()->getLocale() ?? 'en';
+            $language = $request->language ?? (app()->getLocale() ?? "en");
 
-            return redirect()->route('home.index', ['language' => $language])
-                ->with('error', __('app.payment-error'));
+            return redirect()
+                ->route("home.index", ["language" => $language])
+                ->with("error", __("app.payment-error"));
         }
     }
 }

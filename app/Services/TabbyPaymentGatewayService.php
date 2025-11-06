@@ -172,19 +172,14 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
             ];
 
         // Create payment record
-        $payment = Order::first()
-            ->payments()
-            ->create([
-                "user_id" => Auth::user()->id,
-                "external_reference" => $paymentId,
-                "gateway" => PaymentGateway::tabby,
-                "amount" => $payable->price()->getAmount(),
-                "currency" => $payable
-                    ->price()
-                    ->getCurrency()
-                    ->getCurrencyCode(),
-                "details" => $data,
-            ]);
+        $payment = $payable->payments()->create([
+            "user_id" => Auth::user()->id,
+            "external_reference" => $paymentId,
+            "gateway" => PaymentGateway::tabby,
+            "amount" => $payable->price()->getAmount(),
+            "currency" => $payable->price()->getCurrency()->getCurrencyCode(),
+            "details" => $data,
+        ]);
 
         return [$payment, $webUrl];
     }

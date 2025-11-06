@@ -124,7 +124,7 @@
                                         @foreach($paymentMethods as $method)
                                             <label
                                                 class="flex items-center justify-between p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-base-100 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 {{ $method->id === 'tabby' ? 'tabby-payment-method' : '' }}"
-                                                {{ $method->id === 'tabby' ? 'id="tabby-payment-label"' : '' }}>
+                                                id="{{ $method->id === 'tabby' ? 'tabby-payment-label' : 'payment-method-' . $method->id }}">
                                                 <div class="flex items-center space-x-4">
                                                     <input type="radio"
                                                            x-model="paymentMethod"
@@ -232,9 +232,6 @@
                         });
 
                         // Tabby eligibility check
-                        const emailInput = document.getElementById('email');
-                        const phoneInput = document.getElementById('phone');
-                        const nameInput = document.getElementById('name');
                         const eligibilityStatus = document.getElementById('eligibility-status');
                         const tabbyLabel = document.getElementById('tabby-payment-label');
                         const tabbyRadio = document.querySelector('input[value="tabby"]');
@@ -247,17 +244,6 @@
                         tabbyLabel.classList.remove('opacity-50', 'pointer-events-none');
 
                         function checkTabbyEligibility() {
-                            const email = emailInput.value.trim();
-                            const phone = phoneInput.value.trim();
-                            const name = nameInput.value.trim();
-
-                            if (!email || !phone || !name) {
-                                console.log('Tabby: Fields not filled, skipping check');
-                                return;
-                            }
-
-                            console.log('Tabby: Checking eligibility for', email, phone);
-
                             // Show checking status
                             eligibilityStatus.textContent = 'Checking Tabby eligibility...';
                             eligibilityStatus.className = 'mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700';
@@ -276,9 +262,9 @@
                                     amount: total,
                                     currency: '{{ $cart->total->getCurrency()->getCurrencyCode() }}',
                                     buyer: {
-                                        email: email,
-                                        phone: phone,
-                                        name: name
+                                        email: @json(auth()->user()->email),
+                                        phone: @json(auth()->user()->phone),
+                                        name: @json(auth()->user()->name),
                                     }
                                 })
                             })
@@ -332,14 +318,7 @@
                             eligibilityCheckTimeout = setTimeout(checkTabbyEligibility, 1000);
                         }
 
-                        emailInput.addEventListener('input', debounceEligibilityCheck);
-                        phoneInput.addEventListener('input', debounceEligibilityCheck);
-                        nameInput.addEventListener('input', debounceEligibilityCheck);
-
-                        // Initial check if fields are filled
-                        if (emailInput.value && phoneInput.value && nameInput.value) {
-                            checkTabbyEligibility();
-                        }
+                        checkTabbyEligibility();
                     });
                 </script>
 
