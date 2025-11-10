@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\PaymentGatewayService;
-use App\Services\TabbyPaymentGatewayService;
+use App\Services\HyperPayPaymentGatewayService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(
             PaymentGatewayService::class,
-            TabbyPaymentGatewayService::class,
+            HyperPayPaymentGatewayService::class,
         );
     }
 

@@ -9,14 +9,16 @@ use Closure;
 
 enum PaymentGateway: string
 {
-    case myfatoorah = "myfatoorah";
+    case myfatoorah = "myfatoorah"; // Deprecated - will be removed
     case tabby = "tabby";
+    case hyperpay = "hyperpay";
 
     public function label(): string
     {
         return match ($this) {
-            self::myfatoorah => "MyFatoorah",
+            self::myfatoorah => "MyFatoorah (Deprecated)",
             self::tabby => "Tabby",
+            self::hyperpay => "HyperPay",
         };
     }
 
@@ -25,6 +27,7 @@ enum PaymentGateway: string
         return match ($this) {
             self::myfatoorah => "heroicon-o-credit-card",
             self::tabby => "heroicon-o-credit-card",
+            self::hyperpay => "heroicon-o-credit-card",
         };
     }
 

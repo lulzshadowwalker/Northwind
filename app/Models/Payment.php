@@ -20,42 +20,55 @@ class Payment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'external_reference',
-        'gateway',
-        'status',
-        'user_id',
-        'payable_type',
-        'payable_id',
-        'details',
-        'amount',
-        'currency',
+        "external_reference",
+        "gateway",
+        "status",
+        "user_id",
+        "payable_type",
+        "payable_id",
+        "details",
+        "amount",
+        "currency",
     ];
 
     protected function casts(): array
     {
         return [
-            'status' => PaymentStatus::class,
-            'gateway' => PaymentGateway::class,
-            'details' => 'array',
-            'price' => MoneyCast::class,
-            'external_reference' => 'string',
-            'currency' => 'string',
+            "status" => PaymentStatus::class,
+            "gateway" => PaymentGateway::class,
+            "details" => "array",
+            "price" => MoneyCast::class,
+            "money" => MoneyCast::class . ":amount,currency",
+            "external_reference" => "string",
+            "currency" => "string",
+            "amount" => "decimal:2",
         ];
+    }
+
+    public function money(): Attribute
+    {
+        return Attribute::get(function () {
+            return \Brick\Money\Money::of(
+                $this->amount,
+                $this->currency,
+                roundingMode: \Brick\Math\RoundingMode::HALF_UP,
+            );
+        });
     }
 
     public function isPending(): Attribute
     {
-        return Attribute::get(fn () => $this->status === PaymentStatus::pending);
+        return Attribute::get(fn() => $this->status === PaymentStatus::pending);
     }
 
     public function isPaid(): Attribute
     {
-        return Attribute::get(fn () => $this->status === PaymentStatus::paid);
+        return Attribute::get(fn() => $this->status === PaymentStatus::paid);
     }
 
     public function isFailed(): Attribute
     {
-        return Attribute::get(fn () => $this->status === PaymentStatus::failed);
+        return Attribute::get(fn() => $this->status === PaymentStatus::failed);
     }
 
     public function payable(): MorphTo

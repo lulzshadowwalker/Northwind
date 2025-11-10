@@ -56,4 +56,14 @@ return [
         "merchant_code" => env("TABBY_MERCHANT_CODE", "NWSA"),
         "is_test" => env("TABBY_IS_TEST", config("app.env") !== "production"),
     ],
+
+    "hyperpay" => [
+        "base_url" => env("HYPERPAY_BASE_URL"),
+        "entity_id" => env("HYPERPAY_ENTITY_ID"),
+        "access_token" => env("HYPERPAY_ACCESS_TOKEN"),
+        "is_test" => env(
+            "HYPERPAY_IS_TEST",
+            config("app.env") !== "production",
+        ),
+    ],
 ];

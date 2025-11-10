@@ -68,4 +68,24 @@ class PaymentMethod
 
         return $self;
     }
+
+    /**
+     * Creates a new instance of PaymentMethod for HyperPay.
+     */
+    public static function hyperpay(Money $price): self
+    {
+        $self = new self();
+        $self->id = "hyperpay";
+        $self->name =
+            Language::tryFrom(app()->getLocale()) === Language::ar
+                ? "الدفع ببطاقة مدى، فيزا، ماستركارد"
+                : "Pay with MADA, Visa, Mastercard";
+        $self->code = "hyperpay";
+        $self->serviceCharge = Money::of(0, $price->getCurrency());
+        $self->total = $price;
+        $self->image =
+            "https://www.hyperpay.com/wp-content/themes/hyperpaycustomtheme/assets/logo.svg";
+
+        return $self;
+    }
 }

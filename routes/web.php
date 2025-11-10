@@ -131,6 +131,12 @@ Route::post("/payments", [PaymentController::class, "store"])
 Route::get("/payments/callback", [PaymentController::class, "callback"])->name(
     "payments.callback",
 );
+Route::get("/{language}/payments/hyperpay/{payment}", [
+    PaymentController::class,
+    "showHyperPayForm",
+])
+    ->middleware(LanguageMiddleware::class)
+    ->name("payments.hyperpay.form");
 
 // Test login routes for Tabby testing
 Route::get("/test-login/{type}", function ($type) {

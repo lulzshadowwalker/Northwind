@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateOrderFromCart;
 use App\Contracts\PaymentGatewayService;
+use App\Services\HyperPayPaymentGatewayService;
 use App\Services\TabbyPaymentGatewayService;
 use Exception;
 use Illuminate\Http\Request;
@@ -33,7 +34,15 @@ class CheckoutController extends Controller
                 ->with("warning", __("app.please-add-items-before-checkout"));
         }
 
-        $paymentMethods = $this->service->paymentMethods($cart->total);
+        // Get payment methods from both gateways
+        $hyperPayService = app(HyperPayPaymentGatewayService::class);
+        $tabbyService = app(TabbyPaymentGatewayService::class);
+
+        $hyperPayMethods = $hyperPayService->paymentMethods($cart->total);
+        $tabbyMethods = $tabbyService->paymentMethods($cart->total);
+
+        $paymentMethods = array_merge($hyperPayMethods, $tabbyMethods);
+
         if (!count($paymentMethods)) {
             // TODO: Send out an emergency email to admins and developers
             Log::emergency("No payment methods available for checkout", [
@@ -109,10 +118,17 @@ class CheckoutController extends Controller
 
         try {
             $order = CreateOrderFromCart::make()->execute($cart, null, false); // Don't clear cart yet
-            [$payment, $url] = $this->service->start(
-                $order,
-                $request->input("payment_method"),
-            );
+
+            // Determine which gateway to use based on payment method ID
+            $paymentMethodId = $request->input("payment_method");
+
+            $service = match ($paymentMethodId) {
+                "hyperpay" => app(HyperPayPaymentGatewayService::class),
+                "tabby" => app(TabbyPaymentGatewayService::class),
+                default => app(HyperPayPaymentGatewayService::class),
+            };
+
+            [$payment, $url] = $service->start($order, $paymentMethodId);
 
             return redirect()->away($url);
         } catch (Exception $e) {
