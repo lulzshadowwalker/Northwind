@@ -55,6 +55,8 @@ return [
         "public_key" => env("TABBY_PUBLIC_KEY"),
         "merchant_code" => env("TABBY_MERCHANT_CODE", "NWSA"),
         "is_test" => env("TABBY_IS_TEST", config("app.env") !== "production"),
+        "webhook_signature_header" => env("TABBY_WEBHOOK_SIGNATURE_HEADER"),
+        "webhook_signature_value" => env("TABBY_WEBHOOK_SIGNATURE_VALUE"),
     ],
 
     "hyperpay" => [

@@ -45,12 +45,22 @@ class PaymentController extends Controller
 
             $payment = $gateway->callback($request);
 
-            if ($payment->status === PaymentStatus::failed) {
-                throw new Exception("failed to process payment");
-            }
-
             $language = $request->language ?? (app()->getLocale() ?? "en");
 
+            // Handle different payment statuses with distinct messages
+            if ($payment->status === PaymentStatus::failed) {
+                return redirect()
+                    ->route("home.index", ["language" => $language])
+                    ->with("error", __("app.payment-failed"));
+            }
+
+            if ($payment->status === PaymentStatus::cancelled) {
+                return redirect()
+                    ->route("home.index", ["language" => $language])
+                    ->with("warning", __("app.payment-cancelled"));
+            }
+
+            // Payment successful
             return redirect()
                 ->route("home.index", ["language" => $language])
                 ->with("success", __("app.thank-you-for-your-order"))
@@ -105,12 +115,7 @@ class PaymentController extends Controller
         if ($payment->status !== PaymentStatus::pending) {
             return redirect()
                 ->route("home.index", ["language" => app()->getLocale()])
-                ->with(
-                    "error",
-                    __(
-                        "This payment has already been processed or is no longer valid.",
-                    ),
-                );
+                ->with("error", __("app.payment-already-processed"));
         }
 
         // Get the checkout details from HyperPay service
@@ -126,10 +131,7 @@ class PaymentController extends Controller
 
             return redirect()
                 ->route("checkout.index", ["language" => app()->getLocale()])
-                ->with(
-                    "error",
-                    __("Unable to load payment form. Please try again."),
-                );
+                ->with("error", __("app.payment-form-load-error"));
         }
 
         return view("payments.hyperpay-form", [

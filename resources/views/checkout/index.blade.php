@@ -62,21 +62,23 @@
                                 <!-- Subtotal -->
                                 <div class="flex justify-between items-center py-3">
                                     <span class="text-gray-600">Subtotal</span>
-                                    <span
-                                        class="font-semibold text-gray-900">${{ number_format($cart->total->getAmount()->toFloat(), 0) }}</span>
+                                    <span class="font-semibold text-gray-900 flex items-center">
+                                        {{ number_format($cart->total->getAmount()->toFloat(), 2) }} <x-sar />
+                                    </span>
                                 </div>
 
                                 <!-- Shipping -->
                                 <div class="flex justify-between items-center py-3">
                                     <span class="text-gray-600">Shipping</span>
-                                    <span class="font-semibold text-gray-900">$0</span>
+                                    <span class="font-semibold text-gray-900 flex items-center">0.00 <x-sar /></span>
                                 </div>
 
-                                <!-- Tax -->
+                                <!-- Tax (15% VAT) -->
                                 <div class="flex justify-between items-center py-3 border-b border-gray-100">
-                                    <span class="text-gray-600">Tax</span>
-                                    <span
-                                        class="font-semibold text-gray-900">${{ number_format($cart->total->getAmount()->toFloat() * 0.029, 0) }}</span>
+                                    <span class="text-gray-600">Tax (15%)</span>
+                                    <span class="font-semibold text-gray-900 flex items-center">
+                                        {{ number_format($cart->total->getAmount()->toFloat() * 0.15, 2) }} <x-sar />
+                                    </span>
                                 </div>
 
                                 <!-- Promo Code -->
@@ -100,9 +102,9 @@
                                 <div class="pt-4 border-t border-gray-100">
                                     <div class="flex justify-between items-center">
                                         <span class="text-xl font-bold text-gray-900">Total</span>
-                                        <span class="text-2xl font-bold text-gray-900">
-                                        ${{ number_format($cart->total->getAmount()->toFloat() + ($cart->total->getAmount()->toFloat() * 0.029), 0) }}
-                                    </span>
+                                        <span class="text-2xl font-bold text-gray-900 flex items-center">
+                                            {{ number_format($cart->total->getAmount()->toFloat() * 1.15, 2) }} <x-sar />
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -159,13 +161,13 @@
                                                 </div>
 
                                                 <div class="text-right">
-                                        <span class="font-semibold text-gray-900">
-                                            ${{ number_format($method->total->getAmount()->toFloat(), 0) }}
+                                        <span class="font-semibold text-gray-900 flex items-center justify-end">
+                                            {{ number_format($method->total->getAmount()->toFloat() * 1.15, 2) }} <x-sar />
                                         </span>
                                                     @if($method->serviceCharge->getAmount()->toFloat() > 0)
-                                                        <p class="text-xs text-gray-500">
+                                                        <p class="text-xs text-gray-500 flex items-center justify-end">
                                                             (+
-                                                            ${{ number_format($method->serviceCharge->getAmount()->toFloat(), 2) }}
+                                                            {{ number_format($method->serviceCharge->getAmount()->toFloat(), 2) }} <x-sar />
                                                             fee)
                                                         </p>
                                                     @endif
@@ -249,8 +251,8 @@
                             eligibilityStatus.className = 'mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700';
                             eligibilityStatus.classList.remove('hidden');
 
-                            // Calculate total from cart (assuming it's available)
-                            const total = {{ $cart->total->getAmount()->toFloat() }};
+                            // Calculate total from cart including tax (15% VAT)
+                            const total = {{ $cart->total->getAmount()->toFloat() * 1.15 }};
 
                             fetch('{{ route("checkout.tabby-eligibility", ["language" => app()->getLocale()]) }}', {
                                 method: 'POST',

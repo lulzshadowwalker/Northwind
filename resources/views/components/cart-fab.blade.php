@@ -167,6 +167,10 @@
                         class="text-xl font-bold text-base-content inline-flex items-center">{{ $cart->total->getAmount() }}
                         <x-sar /></span>
                 </div>
+
+                <!-- Tabby Promo Widget -->
+                <div id="TabbyPromoCart" class="mb-4"></div>
+
                 <a href="{{ route('checkout.index', ['language' => app()->getLocale()]) }}"
                     class="btn btn-primary w-full">
                     {{ __('app.proceed-to-checkout') }}
@@ -180,3 +184,27 @@
         @endif
     </div>
 </div>
+
+@if (($cart?->cartItems->count() ?? 0) > 0)
+    @push('scripts')
+        <!-- Tabby Promo Script for Cart -->
+        <script src="https://checkout.tabby.ai/tabby-promo.js"></script>
+        <script>
+        function initTabby() {
+            new TabbyPromo({
+                    selector: '#TabbyPromoCart',
+                    currency: 'SAR',
+                    price: '{{ number_format($cart->total->getAmount()->toFloat(), 2, '.', '') }}',
+                    lang: '{{ app()->getLocale() }}',
+                    source: 'cart',
+                    publicKey: '{{ config("services.tabby.public_key") }}',
+                    merchantCode: '{{ config("services.tabby.merchant_code", "NWSA") }}'
+                });
+        }
+
+        initTabby();
+
+        document.addEventListener('ajax:success', initTabby)
+        </script>
+    @endpush
+@endif

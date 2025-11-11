@@ -11,7 +11,9 @@ const zain = new FontFaceObserver("zain");
 
 Promise.all([cairo.load(), inter.load(), arefRuqaa.load(), zain.load()]).then(
     () => {
-        console.log("Fonts loaded");
+        const any = document.querySelector("[data-textify]");
+        if (!any) return;
+
         new Textify(
             {
                 splitType: "lines",
@@ -22,7 +24,7 @@ Promise.all([cairo.load(), inter.load(), arefRuqaa.load(), zain.load()]).then(
                     stagger: 0.075,
                 },
             },
-            gsap
+            gsap,
         );
-    }
+    },
 );

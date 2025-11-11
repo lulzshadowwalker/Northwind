@@ -6,9 +6,11 @@ use App\Actions\CreateOrderFromCart;
 use App\Contracts\PaymentGatewayService;
 use App\Services\HyperPayPaymentGatewayService;
 use App\Services\TabbyPaymentGatewayService;
+use Brick\Math\RoundingMode;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Brick\Money\Money;
 
 class CheckoutController extends Controller
 {
@@ -83,7 +85,11 @@ class CheckoutController extends Controller
         // Use Tabby service directly for eligibility check
         $tabbyService = app(TabbyPaymentGatewayService::class);
 
-        $amount = \Brick\Money\Money::of($request->amount, $request->currency);
+        $amount = Money::of(
+            $request->amount,
+            $request->currency,
+            roundingMode: RoundingMode::HALF_UP,
+        );
 
         $result = $tabbyService->checkEligibility($amount, $request->buyer);
 
@@ -119,6 +125,8 @@ class CheckoutController extends Controller
         try {
             $order = CreateOrderFromCart::make()->execute($cart, null, false); // Don't clear cart yet
 
+            $order->load("orderItems.product");
+
             // Determine which gateway to use based on payment method ID
             $paymentMethodId = $request->input("payment_method");
 
@@ -128,7 +136,21 @@ class CheckoutController extends Controller
                 default => app(HyperPayPaymentGatewayService::class),
             };
 
-            [$payment, $url] = $service->start($order, $paymentMethodId);
+            $result = $service->start($order, $paymentMethodId);
+
+            // Ensure service returns proper array structure
+            if (!is_array($result) || count($result) !== 2) {
+                Log::error("Payment service returned invalid response", [
+                    "service" => get_class($service),
+                    "result" => $result,
+                    "payment_method" => $paymentMethodId,
+                ]);
+                throw new \Exception(
+                    "Payment service returned invalid response",
+                );
+            }
+
+            [$payment, $url] = $result;
 
             return redirect()->away($url);
         } catch (Exception $e) {
@@ -136,6 +158,7 @@ class CheckoutController extends Controller
                 "error" => $e->getMessage(),
                 "cart_id" => $cart->id,
                 "customer_id" => $request->user()->id,
+                "stack_trace" => $e->getTraceAsString(),
             ]);
 
             return redirect()

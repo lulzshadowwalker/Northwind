@@ -22,13 +22,23 @@ class Order extends Model implements Payable
      * @var array
      */
     protected $fillable = [
-        'order_number',
-        'status',
-        'subtotal',
-        'discount_amount',
-        'total',
-        'promo_code',
-        'customer_id',
+        "order_number",
+        "status",
+        "subtotal",
+        "discount_amount",
+        "total",
+        "promo_code",
+        "customer_id",
+        "shipping_address",
+        "shipping_city",
+        "shipping_state",
+        "shipping_zip",
+        "shipping_country",
+        "billing_address",
+        "billing_city",
+        "billing_state",
+        "billing_zip",
+        "billing_country",
     ];
 
     /**
@@ -60,23 +70,59 @@ class Order extends Model implements Payable
 
     public function payments(): MorphMany
     {
-        return $this->morphMany(Payment::class, 'payable');
+        return $this->morphMany(Payment::class, "payable");
     }
 
     public function items(): array
     {
-        return $this->orderItems->map(function (OrderItem $item) {
-            return new PayableItem(
-                name: $item->product_name,
-                price: $item->price,
-                quantity: $item->quantity
-            );
-        })->toArray();
+        return $this->orderItems
+            ->map(function (OrderItem $item) {
+                // Manually create Money object since cast might not be working
+                $price = \Brick\Money\Money::of(
+                    $item->unit_price,
+                    "SAR",
+                    roundingMode: \Brick\Math\RoundingMode::HALF_UP,
+                );
+
+                return new PayableItem(
+                    $item->product_name,
+                    $price,
+                    $item->quantity,
+                );
+            })
+            ->toArray();
     }
 
     public function price(): Money
     {
-        return $this->price;
+        // Ensure orderItems are loaded
+        if (!$this->relationLoaded("orderItems")) {
+            $this->load("orderItems");
+        }
+
+        // Calculate subtotal from order items using proper decimal arithmetic
+        $subtotal = $this->orderItems->reduce(function ($carry, $item) {
+            $itemTotal = \Brick\Math\BigDecimal::of(
+                $item->unit_price,
+            )->multipliedBy(\Brick\Math\BigDecimal::of($item->quantity));
+            return $carry->plus($itemTotal);
+        }, \Brick\Math\BigDecimal::zero());
+
+        // Fallback to stored total if calculation fails
+        if ($subtotal->isZero() || $subtotal->isNegative()) {
+            $subtotal = \Brick\Math\BigDecimal::of($this->total ?? 0);
+        }
+
+        // Add 15% VAT using proper decimal arithmetic
+        $vatRate = \Brick\Math\BigDecimal::of("0.15");
+        $vatAmount = $subtotal->multipliedBy($vatRate);
+        $totalWithTax = $subtotal->plus($vatAmount);
+
+        return Money::of(
+            $totalWithTax->toFloat(),
+            "SAR",
+            roundingMode: \Brick\Math\RoundingMode::HALF_UP,
+        );
     }
 
     public function payer(): User

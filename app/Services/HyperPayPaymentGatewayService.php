@@ -65,7 +65,7 @@ class HyperPayPaymentGatewayService implements PaymentGatewayService
         $currencyCode = $payable->price()->getCurrency()->getCurrencyCode();
 
         // Get user billing details
-        $billingAddress = $this->getBillingAddress($user);
+        $billingAddress = $this->getBillingAddress($user, $payable);
         $customerName = $this->getCustomerName($user);
 
         // Prepare payload for HyperPay checkout
@@ -76,7 +76,12 @@ class HyperPayPaymentGatewayService implements PaymentGatewayService
             "paymentType" => "DB", // Direct Debit/Charge
 
             // Merchant transaction ID (unique identifier)
-            "merchantTransactionId" => $payable->id . "_" . time(),
+            "merchantTransactionId" =>
+                ($payable instanceof \App\Models\Order
+                    ? $payable->id
+                    : uniqid("order_")) .
+                "_" .
+                time(),
 
             // Customer information
             "customer.email" => $user->email,
@@ -141,6 +146,13 @@ class HyperPayPaymentGatewayService implements PaymentGatewayService
             $integrity = $data["integrity"] ?? null;
 
             // Create payment record
+            // Payments relationship should be available on Payable implementations
+            if (!$payable instanceof \App\Models\Order) {
+                throw new \Exception(
+                    "HyperPay payment only supports Order payables",
+                );
+            }
+
             $payment = $payable->payments()->create([
                 "user_id" => Auth::user()->id,
                 "external_reference" => $checkoutId,
@@ -342,17 +354,29 @@ class HyperPayPaymentGatewayService implements PaymentGatewayService
      * Get billing address for the user
      *
      * @param \App\Models\User $user
+     * @param \App\Contracts\Payable|null $payable
      * @return array<string, string>
      */
-    protected function getBillingAddress($user): array
+    protected function getBillingAddress($user, $payable = null): array
     {
-        // TODO: Get actual billing address from user's order or profile
-        // For now, return default Saudi Arabia address
+        // Try to get billing address from the payable (order) if available
+        if ($payable instanceof \App\Models\Order && $payable->billing_city) {
+            return [
+                "street1" => $payable->billing_address ?? "",
+                "city" => $payable->billing_city,
+                "state" => $payable->billing_state ?? "",
+                "country" => $payable->billing_country ?? "",
+                "postcode" => $payable->billing_zip ?? "",
+            ];
+        }
+
+        // Return minimal required fields if no billing address available
+        // HyperPay requires these fields but they can be empty for some payment methods
         return [
             "street1" => "",
             "city" => "",
             "state" => "",
-            "country" => "", // ISO Alpha-2 code
+            "country" => "",
             "postcode" => "",
         ];
     }

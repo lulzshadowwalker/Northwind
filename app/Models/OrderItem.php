@@ -17,13 +17,13 @@ class OrderItem extends Model
      * @var array
      */
     protected $fillable = [
-        'product_name',
-        'quantity',
-        'unit_price',
-        'subtotal',
-        'total',
-        'order_id',
-        'product_id',
+        "product_name",
+        "quantity",
+        "unit_price",
+        "subtotal",
+        "total",
+        "order_id",
+        "product_id",
     ];
 
     /**
@@ -34,13 +34,11 @@ class OrderItem extends Model
     protected function casts(): array
     {
         return [
-            'id' => 'integer',
-            'unit_price' => 'decimal',
-            'price' => MoneyCast::class.':unit_price',
-            'subtotal' => 'decimal',
-            'total' => 'decimal',
-            'order_id' => 'integer',
-            'product_id' => 'integer',
+            "id" => "integer",
+            "subtotal" => "decimal:2",
+            "total" => "decimal:2",
+            "order_id" => "integer",
+            "product_id" => "integer",
         ];
     }
 
