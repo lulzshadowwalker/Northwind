@@ -33,7 +33,7 @@ class CreateOrderFromCart
 
             $order = Order::create([
                 "order_number" => $this->generateOrderNumber(),
-                "status" => "yes", // Assuming 'yes' means active/pending
+                "status" => \App\Enums\OrderStatus::new,
                 "subtotal" => $subtotal->getAmount()->toFloat(),
                 "discount_amount" => $discountAmount->toFloat(),
                 "total" => $total->getAmount()->toFloat(),
