@@ -579,7 +579,7 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
                 $orderData = [
                     "purchased_at" => $order->created_at->toIso8601String(),
                     "amount" => number_format($total, 2, ".", ""),
-                    "status" => $order->status?->value ?? "completed",
+                    "status" => $order->status?->value ?? "unknown",
                     "buyer" => [
                         "phone" => $user->phone ?? "",
                         "email" => $user->email,

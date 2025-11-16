@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,7 +27,7 @@ class OrderFactory extends Factory
             ? fake()->randomFloat(2, 5, min(50, $subtotal * 0.3))
             : 0;
         $total = $subtotal - $discountAmount;
-        $statuses = ['yes', 'no'];
+        $statuses = OrderStatus::values();
         $promoCodes = ['WELCOME10', 'SUMMER20', 'VIP15', null, null, null];
 
         return [

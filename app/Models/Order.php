@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Contracts\Payable;
+use App\Enums\OrderStatus;
 use App\Support\PayableItem;
 use Brick\Money\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,6 +51,7 @@ class Order extends Model implements Payable
     {
         return [
             "id" => "integer",
+            "status" => OrderStatus::class,
             "subtotal" => "decimal:2",
             "discount_amount" => "decimal:2",
             "total" => "decimal:2",

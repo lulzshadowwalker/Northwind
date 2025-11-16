@@ -47,7 +47,7 @@ class Cart extends Model
         });
     }
 
-    public function hasProduct(Product $product): boolean
+    public function hasProduct(Product $product): bool
     {
         return $this->cartItems()->where('product_id', $product->id)->exists();
     }

@@ -10,12 +10,10 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductQuestionController;
 use App\Http\Controllers\ReturnPolicyController;
-use App\Http\Controllers\TabbyWebhookController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\Web\CartItemController;
 use App\Http\Middleware\LanguageMiddleware;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\VerifyCsrfToken;
 
 Route::get("/", fn() => redirect("/en"));
 
@@ -139,11 +137,6 @@ Route::get("/{language}/payments/hyperpay/{payment}", [
 ])
     ->middleware(LanguageMiddleware::class)
     ->name("payments.hyperpay.form");
-
-// Tabby webhook route (no CSRF protection needed)
-Route::post("/webhooks/tabby", [TabbyWebhookController::class, "handle"])
-    ->withoutMiddleware([VerifyCsrfToken::class])
-    ->name("webhooks.tabby");
 
 // Test login routes for Tabby testing
 Route::get("/test-login/{type}", function ($type) {

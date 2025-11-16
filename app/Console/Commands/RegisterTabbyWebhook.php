@@ -46,7 +46,7 @@ class RegisterTabbyWebhook extends Command
 
         // Get or generate webhook URL
         $webhookUrl =
-            $this->option("url") ?? config("app.url") . "/webhooks/tabby";
+            $this->option("url") ?? config("app.url") . "/api/webhooks/tabby";
 
         $this->info("📍 Webhook URL: {$webhookUrl}");
         $this->newLine();
