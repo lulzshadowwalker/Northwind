@@ -436,7 +436,7 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
         try {
             $payload = [
                 "amount" => (string) $payment->amount,
-                "reference_id" => $payment->payable->id,
+                "reference_id" => (string) $payment->payable->id,
             ];
 
             $response = Http::withHeaders([
