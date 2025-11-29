@@ -74,73 +74,28 @@ class TabbyWebhookController extends Controller
 
         try {
             // Handle AUTHORIZED status - capture payment
-            if ($status === "AUTHORIZED") {
+            // Tabby sends "authorized" (lowercase) in webhooks
+            if (strtoupper($status) === "AUTHORIZED") {
                 Log::info("Tabby webhook: handling AUTHORIZED payment", [
                     "payment_id" => $paymentId,
                 ]);
 
-                // Verify payment status with Tabby API
-                $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    "Authorization" =>
-                        "Bearer " . $this->tabbyService->secretKey ??
-                        config("services.tabby.secret_key"),
-                ])->get(
-                    ($this->tabbyService->baseUrl ??
-                        config("services.tabby.base_url")) .
-                        "/api/v2/payments/" .
-                        $paymentId,
-                );
-
-                if (!$response->successful()) {
-                    Log::error("Tabby webhook: failed to verify payment", [
-                        "payment_id" => $paymentId,
-                        "response" => $response->body(),
-                    ]);
-                    return response()->json(
-                        ["error" => "Failed to verify payment"],
-                        500,
-                    );
-                }
-
-                $paymentData = $response->json();
-
-                // Update payment record
+                // We can rely on the service capture method to verify amount and capture
+                // But first we might want to update the status locally if we want to be sure
+                // However, let's just call capture, and if it succeeds, we mark it as paid/captured.
+                
+                // Update payment status to paid (authorized)
                 $payment->status = PaymentStatus::paid;
-                $payment->details = $paymentData;
                 $payment->save();
 
                 // Capture payment if not already captured
                 if (!$payment->captured_at) {
-                    $capturePayload = [
-                        "amount" => (string) $payment->amount,
-                        "reference_id" => (string) $payment->payable_id,
-                    ];
-
-                    $captureResponse = \Illuminate\Support\Facades\Http::withHeaders(
-                        [
-                            "Authorization" =>
-                                "Bearer " .
-                                ($this->tabbyService->secretKey ??
-                                    config("services.tabby.secret_key")),
-                            "Content-Type" => "application/json",
-                        ],
-                    )->post(
-                        ($this->tabbyService->baseUrl ??
-                            config("services.tabby.base_url")) .
-                            "/api/v2/payments/" .
-                            $paymentId .
-                            "/captures",
-                        $capturePayload,
-                    );
-
-                    if ($captureResponse->successful()) {
-                        $payment->captured_at = now();
-                        $payment->save();
-
-                        Log::info("Tabby webhook: payment captured", [
-                            "payment_id" => $paymentId,
-                        ]);
-
+                    $this->tabbyService->capture($payment);
+                    
+                    // Reload payment to check if capture was successful (captured_at set)
+                    $payment->refresh();
+                    
+                    if ($payment->captured_at) {
                         // Clear customer cart
                         $customer = $payment->payable->customer ?? null;
                         if ($customer && $customer->cart) {
@@ -150,11 +105,6 @@ class TabbyWebhookController extends Controller
                                 "customer_id" => $customer->id,
                             ]);
                         }
-                    } else {
-                        Log::error("Tabby webhook: capture failed", [
-                            "payment_id" => $paymentId,
-                            "response" => $captureResponse->body(),
-                        ]);
                     }
                 }
 

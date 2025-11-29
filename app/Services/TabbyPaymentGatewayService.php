@@ -408,7 +408,7 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
 
         // If payment is authorized, capture it
         if ($paymentData["status"] === "AUTHORIZED" && !$payment->captured_at) {
-            $this->capturePayment($payment);
+            $this->capture($payment);
         }
 
         // Clear customer's cart for successful payments
@@ -431,15 +431,32 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
     /**
      * Capture an authorized payment
      */
-    protected function capturePayment(Payment $payment): void
+    public function capture(Payment $payment): void
     {
         try {
+            // 1. Retrieve the payment from Tabby to get the authoritative amount
+            $response = Http::withHeaders([
+                "Authorization" => "Bearer " . $this->secretKey,
+            ])->get($this->baseUrl . "/api/v2/payments/" . $payment->external_reference);
+
+            if (!$response->successful()) {
+                Log::error("Failed to retrieve payment details for capture", [
+                    "payment_id" => $payment->id,
+                    "response" => $response->body(),
+                ]);
+                return;
+            }
+
+            $paymentData = $response->json();
+            $authorizedAmount = $paymentData['amount']; // Use the amount from Tabby
+
+            // 2. Send the Capture Request with the correct amount and string reference_id
             $payload = [
-                "amount" => (string) $payment->amount,
-                "reference_id" => (string) $payment->payable->id,
+                "amount" => (string) $authorizedAmount,
+                "reference_id" => (string) $payment->payable->id, // Ensure string
             ];
 
-            $response = Http::withHeaders([
+            $captureResponse = Http::withHeaders([
                 "Authorization" => "Bearer " . $this->secretKey,
                 "Content-Type" => "application/json",
             ])->post(
@@ -450,16 +467,27 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
                 $payload,
             );
 
-            if ($response->successful()) {
-                $payment->captured_at = now();
-                $payment->save();
+            if ($captureResponse->successful()) {
+                $updates = ['captured_at' => now()];
+                
+                // Update local amount to match what was actually captured if different
+                if ($payment->amount != $authorizedAmount) {
+                     Log::warning("Payment amount mismatch corrected during capture", [
+                        "local_amount" => $payment->amount,
+                        "captured_amount" => $authorizedAmount
+                     ]);
+                     $updates['amount'] = $authorizedAmount;
+                }
+                
+                $payment->update($updates);
+                
                 Log::info("Payment captured successfully", [
                     "payment_id" => $payment->id,
                 ]);
             } else {
                 Log::error("Payment capture failed", [
                     "payment_id" => $payment->id,
-                    "response" => $response->body(),
+                    "response" => $captureResponse->body(),
                 ]);
             }
         } catch (\Exception $e) {

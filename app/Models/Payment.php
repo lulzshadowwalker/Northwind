@@ -29,6 +29,7 @@ class Payment extends Model
         "details",
         "amount",
         "currency",
+        "captured_at",
     ];
 
     protected function casts(): array
