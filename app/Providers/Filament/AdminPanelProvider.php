@@ -19,6 +19,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
 
@@ -26,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        URL::forceHttps();
         return $panel
             ->authGuard('admin')
             ->default()
@@ -53,30 +55,30 @@ class AdminPanelProvider extends PanelProvider
             ->navigationItems([
                 NavigationItem::make('telescope')
                     ->label('Telescope')
-                    ->badge(fn (): string => '●')
+                    ->badge(fn(): string => '●')
                     ->badgeTooltip('Telescope helps track what happens behind the scenes in your app.')
-                    ->url(fn (): string => app()->environment('local') ? route('telescope') : '#', shouldOpenInNewTab: true)
+                    ->url(fn(): string => app()->environment('local') ? route('telescope') : '#', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-chart-bar-square')
                     ->group('Monitor')
-                    ->visible(fn (): bool => ! app()->environment('testing') && app()->environment(['local', 'staging']) && Auth::guard('admin')->user()->is_admin),
+                    ->visible(fn(): bool => !app()->environment('testing') && app()->environment(['local', 'staging']) && Auth::guard('admin')->user()->is_admin),
 
                 NavigationItem::make('pulse')
                     ->label('Pulse')
-                    ->badge(fn (): string => '●')
+                    ->badge(fn(): string => '●')
                     ->badgeTooltip('Pulse provides real-time insights into your application\'s performance and health.')
-                    ->url(fn (): string => route('pulse'), shouldOpenInNewTab: true)
+                    ->url(fn(): string => route('pulse'), shouldOpenInNewTab: true)
                     ->icon('heroicon-o-heart')
                     ->group('Monitor')
-                    ->visible(fn (): bool => ! app()->environment('testing') && Auth::guard('admin')->user()->is_admin),
+                    ->visible(fn(): bool => !app()->environment('testing') && Auth::guard('admin')->user()->is_admin),
 
                 NavigationItem::make('horizon')
                     ->label('Horizon')
-                    ->badge(fn (): string => '●')
+                    ->badge(fn(): string => '●')
                     ->badgeTooltip('Horizon gives you a simple way to manage and monitor background tasks.')
-                    ->url(fn (): string => route('horizon.index'), shouldOpenInNewTab: true)
+                    ->url(fn(): string => route('horizon.index'), shouldOpenInNewTab: true)
                     ->icon('heroicon-o-lifebuoy')
                     ->group('Monitor')
-                    ->visible(fn (): bool => ! app()->environment('testing') && Auth::guard('admin')->user()->is_admin),
+                    ->visible(fn(): bool => !app()->environment('testing') && Auth::guard('admin')->user()->is_admin),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
