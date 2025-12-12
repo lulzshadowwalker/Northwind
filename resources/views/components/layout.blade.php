@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    @unless (app()->environment('local'))
+    @if (app()->environment('production'))
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-BTWQ5QP28W"></script>
         <script>
@@ -20,7 +20,7 @@
 
             gtag('config', 'G-BTWQ5QP28W');
         </script>
-    @endunless
+    @endif
 
     <title>{{ isset($title) && $title ? $title . ' | ' . config('app.name') : config('app.name') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
