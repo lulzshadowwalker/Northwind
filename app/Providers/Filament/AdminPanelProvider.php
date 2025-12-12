@@ -57,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Telescope')
                     ->badge(fn(): string => '●')
                     ->badgeTooltip('Telescope helps track what happens behind the scenes in your app.')
-                    ->url(fn(): string => app()->environment('local') ? route('telescope') : '#', shouldOpenInNewTab: true)
+                    ->url(fn(): string => !app()->environment('testing') ? route('telescope') : '#', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-chart-bar-square')
                     ->group('Monitor')
                     ->visible(fn(): bool => !app()->environment('testing') && app()->environment(['local', 'staging']) && Auth::guard('admin')->user()->is_admin),
