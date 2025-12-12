@@ -60,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn(): string => !app()->environment('testing') ? route('telescope') : '#', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-chart-bar-square')
                     ->group('Monitor')
-                    ->visible(fn(): bool => !app()->environment('testing') && app()->environment(['local', 'staging']) && Auth::guard('admin')->user()->is_admin),
+                    ->visible(fn(): bool => !app()->environment('testing') && Auth::guard('admin')->user()->is_admin),
 
                 NavigationItem::make('pulse')
                     ->label('Pulse')
