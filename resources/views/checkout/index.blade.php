@@ -46,10 +46,19 @@
                                         </div>
 
                                         <!-- Price -->
-                                        <div class="text-right">
-                                    <span class="font-semibold text-gray-900">
-                                        <x-sar /> {{ number_format(($item->product->sale_price ?? $item->product->price)->getAmount()->toFloat() * $item->quantity, 0) }}
-                                    </span>
+                                        <div class="text-right min-w-fit">
+                                            @if($item->product->sale_price)
+                                                <span class="text-xs text-gray-400 line-through inline-block me-1">
+                                                    {{ number_format($item->product->price->getAmount()->toFloat() * $item->quantity, 0) }}
+                                                </span>
+                                                <span class="font-semibold text-gray-900">
+                                                    {{ number_format($item->product->sale_price->getAmount()->toFloat() * $item->quantity, 0) }} <x-sar />
+                                                </span>
+                                            @else
+                                                <span class="font-semibold text-gray-900">
+                                                    {{ number_format($item->product->price->getAmount()->toFloat() * $item->quantity, 0) }} <x-sar />
+                                                </span>
+                                            @endif
                                         </div>
                                     </div>
                                 @endforeach

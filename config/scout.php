@@ -228,7 +228,7 @@ return [
                     'query_by' => 'name_ar,name_en,description_ar,description_en,category_ar,category_en',
                     'exhaustive_search' => true,
                 ],
-            ]
+            ],
         ],
     ],
 

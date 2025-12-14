@@ -63,9 +63,10 @@ class CalculateCartTotalTest extends TestCase
         $cart = Cart::factory()->create();
         $product1 = Product::factory()->create([
             'amount' => 100,
-            'sale_amount' => 80 // Sale price 80 SAR
+            'sale_amount' => 80, // Sale price 80 SAR
+            'sale_end_date' => now()->addDay(), // Sale is active
         ]); 
-        $product2 = Product::factory()->create(['amount' => 200]); // 200 SAR
+        $product2 = Product::factory()->create(['amount' => 200, 'sale_amount' => null]); // 200 SAR
 
         CartItem::factory()->create([
             'cart_id' => $cart->id,

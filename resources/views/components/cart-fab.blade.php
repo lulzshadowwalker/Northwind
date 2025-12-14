@@ -111,10 +111,20 @@
                             <p class="text-sm font-light text-neutral-500 line-clamp-2">
                                 {{ $item->product->description }}
                             </p>
-                            <p class="text-lg font-bold text-base-content mt-2 flex items-center">
-                                {{ $item->product->price->getAmount() }}
-                                <x-sar />
-                            </p>
+                            <div class="mt-2 flex items-center gap-2">
+                                @if($item->product->sale_price)
+                                    <p class="text-sm text-neutral-400 line-through">
+                                        {{ $item->product->price->getAmount() }}
+                                    </p>
+                                    <p class="text-lg font-bold text-base-content">
+                                        {{ $item->product->sale_price->getAmount() }} <x-sar />
+                                    </p>
+                                @else
+                                    <p class="text-lg font-bold text-base-content">
+                                        {{ $item->product->price->getAmount() }} <x-sar />
+                                    </p>
+                                @endif
+                            </div>
                         </div>
                         <div class="flex flex-col items-end justify-between h-24">
                             <form x-target="js-cart-fab"

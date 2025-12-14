@@ -24,6 +24,14 @@ class MoneyCast implements CastsAttributes
             return $value;
         }
 
+        // Check for sale expiration if this is the sale_price cast
+        if ($this->column === 'sale_amount' && isset($attributes['sale_end_date'])) {
+            $saleEndDate = \Carbon\Carbon::parse($attributes['sale_end_date']);
+            if ($saleEndDate->isPast()) {
+                return null;
+            }
+        }
+
         $amount = $attributes[$this->column] ?? null;
         if (! $amount) {
             return null;

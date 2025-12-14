@@ -40,6 +40,7 @@ class Product extends Model implements HasMedia
         'sale_price',
         'amount',
         'sale_amount',
+        'sale_end_date',
     ];
 
     protected static function boot(): void
@@ -66,10 +67,10 @@ class Product extends Model implements HasMedia
         $counter = 1;
 
         while (static::where('slug', $slug)
-            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
             ->exists()
         ) {
-            $slug = $baseSlug . '-' . $counter++;
+            $slug = $baseSlug.'-'.$counter++;
         }
 
         return $slug;
@@ -97,7 +98,7 @@ class Product extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $fallback = 'https://placehold.co/400x225.png?text=' . str_replace(' ', '%20', $this->getTranslation('name', 'en'));
+        $fallback = 'https://placehold.co/400x225.png?text='.str_replace(' ', '%20', $this->getTranslation('name', 'en'));
 
         $this->addMediaCollection(self::MEDIA_COLLECTION_IMAGES);
         $this->addMediaCollection(self::MEDIA_COLLECTION_COVER)
@@ -168,6 +169,17 @@ class Product extends Model implements HasMedia
         });
     }
 
+    public function displayPrice(): Attribute
+    {
+        return Attribute::get(function () {
+            if ($this->sale_end_date && $this->sale_end_date->isFuture() && $this->sale_price) {
+                return $this->sale_price;
+            }
+
+            return $this->sale_price ?? $this->price;
+        });
+    }
+
     public function isFavorite(): Attribute
     {
         return Attribute::get(function () {
@@ -177,7 +189,7 @@ class Product extends Model implements HasMedia
             }
 
             if ($this->relationLoaded('favorites')) {
-                return $this->favorites->contains(fn($fav) => (int) $fav->customer_id === (int) $customer->id);
+                return $this->favorites->contains(fn ($fav) => (int) $fav->customer_id === (int) $customer->id);
             }
 
             return $this->favorites()->where('customer_id', $customer->id)->exists();
@@ -210,9 +222,10 @@ class Product extends Model implements HasMedia
             'id' => 'integer',
             'is_active' => 'boolean',
             'category_id' => 'integer',
-            'sale_price' => MoneyCast::class . ':sale_amount',
+            'sale_price' => MoneyCast::class.':sale_amount',
             'price' => MoneyCast::class,
             'product_id' => 'integer',
+            'sale_end_date' => 'datetime',
         ];
     }
 

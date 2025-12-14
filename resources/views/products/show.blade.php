@@ -1,7 +1,9 @@
 <x-layout title="{{ $product->name }} - Mystic Bloom">
     <div class="bg-base-100 text-base-content" x-data="productGallery()">
         <!-- Sale Countdown Banner -->
-        <div class="bg-gradient-to-r from-primary to-secondary text-white py-4">
+        @if($product->sale_price && $product->sale_end_date && $product->sale_end_date->isFuture())
+        <div class="bg-gradient-to-r from-primary to-secondary text-white py-4"
+             x-data="countdown('{{ $product->sale_end_date->toIso8601String() }}')">
             <div class="container mx-auto px-4 text-center">
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <div class="flex items-center gap-2">
@@ -12,22 +14,27 @@
                         <span class="text-sm opacity-90">{{ __('app.ends-in') }}</span>
                         <div class="flex gap-1">
                             <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span style="--value:2;" aria-live="polite" aria-label="2">2</span>
+                                <span :style="`--value:${days};`" x-text="days"></span>
                             </div>
                             <span class="text-xs self-center">d</span>
                             <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span style="--value:15;" aria-live="polite" aria-label="15">15</span>
+                                <span :style="`--value:${hours};`" x-text="hours"></span>
                             </div>
                             <span class="text-xs self-center">h</span>
                             <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span style="--value:42;" aria-live="polite" aria-label="42">42</span>
+                                <span :style="`--value:${minutes};`" x-text="minutes"></span>
                             </div>
                             <span class="text-xs self-center">m</span>
+                            <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
+                                <span :style="`--value:${seconds};`" x-text="seconds"></span>
+                            </div>
+                            <span class="text-xs self-center">s</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        @endif
 
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 py-8 lg:py-16">
@@ -90,6 +97,20 @@
                                 class="text-4xl lg:text-5xl font-serif font-light text-gray-800 leading-tight _font-zain">
                                 {{ $product->name }}
                             </h1>
+                            <div class="mt-4 flex items-center gap-3">
+                                @if($product->sale_price)
+                                    <span class="text-xl text-gray-400 line-through">
+                                        {{ $product->price->getAmount() }}
+                                    </span>
+                                    <span class="text-3xl font-bold text-gray-900">
+                                        {{ $product->sale_price->getAmount() }} <x-sar />
+                                    </span>
+                                @else
+                                    <span class="text-3xl font-bold text-gray-900">
+                                        {{ $product->price->getAmount() }} <x-sar />
+                                    </span>
+                                @endif
+                            </div>
                         </div>
 
                         <!-- Rating & Reviews -->
@@ -379,12 +400,40 @@
         new TabbyPromo({
             selector: '#TabbyPromo',
             currency: 'SAR', // Change to AED for UAE, KWD for Kuwait
-            price: '{{ number_format($product->price->getAmount()->toFloat(), 2, '.', '') }}',
+            price: '{{ number_format($product->display_price->getAmount()->toFloat(), 2, '.', '') }}',
             lang: '{{ app()->getLocale() === "ar" ? "ar" : "en" }}',
             source: 'product',
             publicKey: '{{ config("services.tabby.public_key") }}',
             merchantCode: '{{ config("services.tabby.merchant_code", "NWSA") }}'
         });
+
+        function countdown(expiry) {
+            return {
+                expiry: new Date(expiry).getTime(),
+                remaining: null,
+                days: 0,
+                hours: 0,
+                minutes: 0,
+                seconds: 0,
+                init() {
+                    this.setRemaining();
+                    setInterval(() => {
+                        this.setRemaining();
+                    }, 1000);
+                },
+                setRemaining() {
+                    const now = new Date().getTime();
+                    this.remaining = this.expiry - now;
+                    if (this.remaining < 0) {
+                        this.remaining = 0;
+                    }
+                    this.days = Math.floor(this.remaining / (1000 * 60 * 60 * 24));
+                    this.hours = Math.floor((this.remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    this.minutes = Math.floor((this.remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    this.seconds = Math.floor((this.remaining % (1000 * 60)) / 1000);
+                }
+            }
+        }
 
         function productGallery() {
             const productName = '{{ $product->name }}';

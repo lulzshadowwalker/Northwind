@@ -85,6 +85,10 @@ class ProductResource extends Resource
                             ->numeric()
                             ->prefix('SAR')
                             ->helperText('An optional sale price. If set, this will be displayed as the current price.'),
+
+                        Forms\Components\DateTimePicker::make('sale_end_date')
+                            ->label('Sale End Date')
+                            ->helperText('The date and time when the sale ends.'),
                     ]),
 
                 Forms\Components\Section::make('Associations')

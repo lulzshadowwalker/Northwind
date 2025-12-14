@@ -23,6 +23,7 @@ class ProductFactory extends BaseFactory
             'name' => $this->localized(fn (): string => fake()->sentence(2, 3)),
             'amount' => fake()->randomFloat(2, 10, 100),
             'sale_amount' => fake()->optional(0.3, null)->randomFloat(2, 5, 50),
+            'sale_end_date' => fake()->optional(0.3, null)->dateTimeBetween('now', '+1 month'),
             'slug' => fake()->unique()->slug(),
             'description' => $this->localized(
                 fn (): string => fake()->sentence(18, 28)

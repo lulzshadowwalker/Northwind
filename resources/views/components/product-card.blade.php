@@ -14,8 +14,8 @@
                     (isset($collection) ? 'c' . $collection->id . '-p' . $product->id : 'p-' . $product->id);
             @endphp
             <div id="{{ $id }}" class="absolute top-2 end-2 flex flex-col items-center gap-1 z-10">
-                <form x-target="{{ $id }}"
-                    action="{{ route('favorites.store', ['language' => app()->getLocale()]) }}" method="post"
+                <form x-target="{{ $id }}" action="{{ route('favorites.store', ['language' => app()->getLocale()]) }}"
+                    method="post"
                     class="tooltip tooltip-bottom @if (app()->getLocale() === 'ar') tooltip-right @else tooltip-left @endif"
                     data-tip="{{ $product->isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}">
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -34,7 +34,9 @@
 
                 <form x-target="js-cart-fab js-cart-slideover {{ $id }}"
                     action="{{ $cartItem ? route('cart.items.increment', ['cartItem' => $cartItem->id, 'language' => app()->getLocale()]) : route('cart.items.add', ['product' => $product->slug, 'language' => app()->getLocale()]) }}"
-                    method="post" class="tooltip @if (app()->getLocale() === 'ar') tooltip-right @else tooltip-left @endif" data-tip="Add to Cart">
+                    method="post"
+                    class="tooltip @if (app()->getLocale() === 'ar') tooltip-right @else tooltip-left @endif"
+                    data-tip="Add to Cart">
                     @csrf
                     <button class="btn btn-sm btn-circle" aria-label="Add to Cart">
                         <i class="fa fa-plus"></i>
@@ -48,7 +50,8 @@
 
                     <form x-target="js-cart-fab js-cart-slideover {{ $id }}"
                         action="{{ !$cartItem->last ? route('cart.items.decrement', ['cartItem' => $cartItem->id, 'language' => app()->getLocale()]) : route('cart.items.remove', ['cartItem' => $cartItem->id, 'language' => app()->getLocale()]) }}"
-                        method="post" class="tooltip tooltip-bottom @if (app()->getLocale() === 'ar') tooltip-right @else tooltip-left @endif"
+                        method="post"
+                        class="tooltip tooltip-bottom @if (app()->getLocale() === 'ar') tooltip-right @else tooltip-left @endif"
                         data-tip="{{ $cartItem->last ? 'Delete from Cart' : 'Decrease from Cart' }}">
                         @csrf
                         @method($cartItem->last ? 'delete' : 'post')
@@ -75,10 +78,19 @@
         </p>
 
         <!-- Price - Prominent display -->
-        <div class="flex items-center justify-end pt-1">
-            <span class="text-lg font-semibold text-base-content flex items-center">
-                {{ $product->price->getAmount() }} <x-sar />
-            </span>
+        <div class="flex items-center justify-end pt-1 gap-2">
+            @if($product->sale_price)
+                <span class="text-sm text-neutral-400 line-through flex items-center">
+                    {{ $product->price->getAmount() }}
+                </span>
+                <span class="text-lg font-semibold text-base-content flex items-center">
+                    {{ $product->sale_price->getAmount() }} <x-sar />
+                </span>
+            @else
+                <span class="text-lg font-semibold text-base-content flex items-center">
+                    {{ $product->price->getAmount() }} <x-sar />
+                </span>
+            @endif
         </div>
     </div>
 </a>
