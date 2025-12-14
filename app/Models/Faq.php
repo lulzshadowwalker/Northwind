@@ -11,7 +11,7 @@ class Faq extends Model
     /** @use HasFactory<\Database\Factories\FaqFactory> */
     use HasFactory, HasTranslations;
 
-    protected $fillable = ["question", "answer"];
+    protected $fillable = ['question', 'answer'];
 
-    public array $translatable = ["question", "answer"];
+    public array $translatable = ['question', 'answer'];
 }

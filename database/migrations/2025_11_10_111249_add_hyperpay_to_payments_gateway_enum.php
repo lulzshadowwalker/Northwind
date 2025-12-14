@@ -4,7 +4,8 @@ use App\Enums\PaymentGateway;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -12,8 +13,8 @@ return new class extends Migration {
     {
         // Update the enum to include hyperpay
         DB::statement(
-            "ALTER TABLE payments MODIFY COLUMN gateway ENUM('" .
-                implode("','", PaymentGateway::values()) .
+            "ALTER TABLE payments MODIFY COLUMN gateway ENUM('".
+                implode("','", PaymentGateway::values()).
                 "')",
         );
     }

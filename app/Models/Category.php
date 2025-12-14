@@ -16,7 +16,7 @@ class Category extends Model
      *
      * @var array
      */
-    protected $fillable = ["name", "slug"];
+    protected $fillable = ['name', 'slug'];
 
     /**
      * Get the attributes that should be cast.
@@ -26,12 +26,12 @@ class Category extends Model
     protected function casts(): array
     {
         return [
-            "id" => "integer",
-            "name" => "array",
+            'id' => 'integer',
+            'name' => 'array',
         ];
     }
 
-    public array $translatable = ["name"];
+    public array $translatable = ['name'];
 
     public function products(): HasMany
     {

@@ -50,6 +50,6 @@ class ProductQuestion extends Model
 
     public function isAnswered(): Attribute
     {
-        return Attribute::get(fn(): bool => !empty($this->answer));
+        return Attribute::get(fn (): bool => ! empty($this->answer));
     }
 }

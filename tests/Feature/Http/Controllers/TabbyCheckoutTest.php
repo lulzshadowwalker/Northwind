@@ -20,8 +20,11 @@ class TabbyCheckoutTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Customer $customer;
+
     protected Cart $cart;
+
     protected Product $product;
 
     protected function setUp(): void
@@ -30,26 +33,26 @@ class TabbyCheckoutTest extends TestCase
 
         // Create test user and customer
         $this->user = User::factory()->create([
-            "email" => "test@example.com",
-            "phone" => "+966500000001",
+            'email' => 'test@example.com',
+            'phone' => '+966500000001',
         ]);
         $this->customer = Customer::factory()->create([
-            "user_id" => $this->user->id,
+            'user_id' => $this->user->id,
         ]);
 
         // Create test product
         $this->product = Product::factory()->create([
-            "name" => "Test Product",
-            "price" => 1000, // SAR
+            'name' => 'Test Product',
+            'price' => 1000, // SAR
         ]);
 
         // Create cart with item
         $this->cart = Cart::factory()->create([
-            "customer_id" => $this->customer->id,
+            'customer_id' => $this->customer->id,
         ]);
         $this->cart->cartItems()->create([
-            "product_id" => $this->product->id,
-            "quantity" => 1,
+            'product_id' => $this->product->id,
+            'quantity' => 1,
         ]);
 
         // Set up cart relationship
@@ -62,13 +65,13 @@ class TabbyCheckoutTest extends TestCase
 
         // Mock successful eligibility check
         Http::fake([
-            "https://api.tabby.ai/api/v2/checkout" => Http::response(
+            'https://api.tabby.ai/api/v2/checkout' => Http::response(
                 [
-                    "status" => "created",
-                    "configuration" => [
-                        "products" => [
-                            "installments" => [
-                                "rejection_reason" => null,
+                    'status' => 'created',
+                    'configuration' => [
+                        'products' => [
+                            'installments' => [
+                                'rejection_reason' => null,
                             ],
                         ],
                     ],
@@ -78,21 +81,21 @@ class TabbyCheckoutTest extends TestCase
         ]);
 
         $response = $this->postJson(
-            route("checkout.tabby-eligibility", ["language" => "en"]),
+            route('checkout.tabby-eligibility', ['language' => 'en']),
             [
-                "amount" => 1000,
-                "currency" => "SAR",
-                "buyer" => [
-                    "email" => "otp.success@tabby.ai",
-                    "phone" => "+966500000001",
-                    "name" => "Test Customer",
+                'amount' => 1000,
+                'currency' => 'SAR',
+                'buyer' => [
+                    'email' => 'otp.success@tabby.ai',
+                    'phone' => '+966500000001',
+                    'name' => 'Test Customer',
                 ],
             ],
         );
 
         $response->assertStatus(200)->assertJson([
-            "eligible" => true,
-            "status" => "created",
+            'eligible' => true,
+            'status' => 'created',
         ]);
     }
 
@@ -102,13 +105,13 @@ class TabbyCheckoutTest extends TestCase
 
         // Mock rejection eligibility check
         Http::fake([
-            "https://api.tabby.ai/api/v2/checkout" => Http::response(
+            'https://api.tabby.ai/api/v2/checkout' => Http::response(
                 [
-                    "status" => "rejected",
-                    "configuration" => [
-                        "products" => [
-                            "installments" => [
-                                "rejection_reason" => "order_amount_too_high",
+                    'status' => 'rejected',
+                    'configuration' => [
+                        'products' => [
+                            'installments' => [
+                                'rejection_reason' => 'order_amount_too_high',
                             ],
                         ],
                     ],
@@ -118,22 +121,22 @@ class TabbyCheckoutTest extends TestCase
         ]);
 
         $response = $this->postJson(
-            route("checkout.tabby-eligibility", ["language" => "en"]),
+            route('checkout.tabby-eligibility', ['language' => 'en']),
             [
-                "amount" => 1000,
-                "currency" => "SAR",
-                "buyer" => [
-                    "email" => "otp.success@tabby.ai",
-                    "phone" => "+966500000002",
-                    "name" => "Test Customer",
+                'amount' => 1000,
+                'currency' => 'SAR',
+                'buyer' => [
+                    'email' => 'otp.success@tabby.ai',
+                    'phone' => '+966500000002',
+                    'name' => 'Test Customer',
                 ],
             ],
         );
 
         $response->assertStatus(200)->assertJson([
-            "eligible" => false,
-            "status" => "rejected",
-            "reason" => "order_amount_too_high",
+            'eligible' => false,
+            'status' => 'rejected',
+            'reason' => 'order_amount_too_high',
         ]);
     }
 
@@ -143,14 +146,14 @@ class TabbyCheckoutTest extends TestCase
 
         // Mock session creation
         Http::fake([
-            "https://api.tabby.ai/api/v2/checkout" => Http::response(
+            'https://api.tabby.ai/api/v2/checkout' => Http::response(
                 [
-                    "status" => "created",
-                    "payment" => ["id" => "test_payment_id_123"],
-                    "configuration" => [
-                        "available_products" => [
-                            "installments" => [
-                                ["web_url" => "https://checkout.tabby.ai/test"],
+                    'status' => 'created',
+                    'payment' => ['id' => 'test_payment_id_123'],
+                    'configuration' => [
+                        'available_products' => [
+                            'installments' => [
+                                ['web_url' => 'https://checkout.tabby.ai/test'],
                             ],
                         ],
                     ],
@@ -159,21 +162,21 @@ class TabbyCheckoutTest extends TestCase
             ),
         ]);
 
-        $response = $this->post(route("checkout.store", ["language" => "en"]), [
-            "payment_method" => "tabby",
+        $response = $this->post(route('checkout.store', ['language' => 'en']), [
+            'payment_method' => 'tabby',
         ]);
 
-        $response->assertRedirect("https://checkout.tabby.ai/test");
+        $response->assertRedirect('https://checkout.tabby.ai/test');
 
         // Check that order and payment were created
-        $this->assertDatabaseHas("orders", [
-            "customer_id" => $this->customer->id,
+        $this->assertDatabaseHas('orders', [
+            'customer_id' => $this->customer->id,
         ]);
 
-        $this->assertDatabaseHas("payments", [
-            "gateway" => PaymentGateway::tabby,
-            "external_reference" => "test_payment_id_123",
-            "status" => PaymentStatus::pending,
+        $this->assertDatabaseHas('payments', [
+            'gateway' => PaymentGateway::tabby,
+            'external_reference' => 'test_payment_id_123',
+            'status' => PaymentStatus::pending,
         ]);
     }
 
@@ -181,46 +184,46 @@ class TabbyCheckoutTest extends TestCase
     {
         // Create test order and payment
         $order = Order::factory()->create([
-            "customer_id" => $this->customer->id,
+            'customer_id' => $this->customer->id,
         ]);
 
         $payment = Payment::factory()->create([
-            "payable_type" => Order::class,
-            "payable_id" => $order->id,
-            "external_reference" => "test_payment_id_123",
-            "gateway" => PaymentGateway::tabby,
-            "status" => PaymentStatus::pending,
+            'payable_type' => Order::class,
+            'payable_id' => $order->id,
+            'external_reference' => 'test_payment_id_123',
+            'gateway' => PaymentGateway::tabby,
+            'status' => PaymentStatus::pending,
         ]);
 
         // Mock payment verification and capture
         Http::fake([
-            "https://api.tabby.ai/api/v2/payments/test_payment_id_123" => Http::response(
+            'https://api.tabby.ai/api/v2/payments/test_payment_id_123' => Http::response(
                 [
-                    "status" => "AUTHORIZED",
-                    "id" => "test_payment_id_123",
-                    "amount" => "98.88",
+                    'status' => 'AUTHORIZED',
+                    'id' => 'test_payment_id_123',
+                    'amount' => '98.88',
                 ],
                 200,
             ),
-            "https://api.tabby.ai/api/v2/payments/test_payment_id_123/captures" => Http::response(
+            'https://api.tabby.ai/api/v2/payments/test_payment_id_123/captures' => Http::response(
                 [
-                    "id" => "capture_123",
-                    "amount" => "98.88",
+                    'id' => 'capture_123',
+                    'amount' => '98.88',
                 ],
                 200,
             ),
         ]);
 
         $response = $this->get(
-            route("payments.callback", [
-                "language" => "en",
-                "payment_id" => "test_payment_id_123",
+            route('payments.callback', [
+                'language' => 'en',
+                'payment_id' => 'test_payment_id_123',
             ]),
         );
 
         $response
-            ->assertRedirect(route("home.index", ["language" => "en"]))
-            ->assertSessionHas("success");
+            ->assertRedirect(route('home.index', ['language' => 'en']))
+            ->assertSessionHas('success');
 
         // Check payment was updated
         $payment->refresh();
@@ -235,37 +238,37 @@ class TabbyCheckoutTest extends TestCase
     {
         // Create test order and payment
         $order = Order::factory()->create([
-            "customer_id" => $this->customer->id,
+            'customer_id' => $this->customer->id,
         ]);
 
         $payment = Payment::factory()->create([
-            "payable_type" => Order::class,
-            "payable_id" => $order->id,
-            "external_reference" => "invalid_payment_id",
-            "gateway" => PaymentGateway::tabby,
-            "status" => PaymentStatus::pending,
+            'payable_type' => Order::class,
+            'payable_id' => $order->id,
+            'external_reference' => 'invalid_payment_id',
+            'gateway' => PaymentGateway::tabby,
+            'status' => PaymentStatus::pending,
         ]);
 
         // Mock failed payment verification
         Http::fake([
-            "https://api.tabby.ai/api/v2/payments/invalid_payment_id" => Http::response(
+            'https://api.tabby.ai/api/v2/payments/invalid_payment_id' => Http::response(
                 [
-                    "error" => "Payment not found",
+                    'error' => 'Payment not found',
                 ],
                 404,
             ),
         ]);
 
         $response = $this->get(
-            route("payments.callback", [
-                "language" => "en",
-                "payment_id" => "invalid_payment_id",
+            route('payments.callback', [
+                'language' => 'en',
+                'payment_id' => 'invalid_payment_id',
             ]),
         );
 
         $response
-            ->assertRedirect(route("home.index", ["language" => "en"]))
-            ->assertSessionHas("error");
+            ->assertRedirect(route('home.index', ['language' => 'en']))
+            ->assertSessionHas('error');
 
         // Check payment status wasn't changed
         $payment->refresh();
@@ -276,12 +279,12 @@ class TabbyCheckoutTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        $response = $this->get(route("checkout.index", ["language" => "en"]));
+        $response = $this->get(route('checkout.index', ['language' => 'en']));
 
         $response
             ->assertStatus(200)
-            ->assertSee("Pay later with Tabby")
-            ->assertSee("tabby-payment-method");
+            ->assertSee('Pay later with Tabby')
+            ->assertSee('tabby-payment-method');
     }
 
     public function test_tabby_service_returns_payment_methods()
@@ -289,25 +292,25 @@ class TabbyCheckoutTest extends TestCase
         $tabbyService = app(TabbyPaymentGatewayService::class);
 
         $methods = $tabbyService->paymentMethods(
-            \Brick\Money\Money::of(1000, "SAR"),
+            \Brick\Money\Money::of(1000, 'SAR'),
         );
 
         $this->assertCount(1, $methods);
-        $this->assertEquals("tabby", $methods[0]->id);
-        $this->assertEquals("Pay later with Tabby", $methods[0]->name);
+        $this->assertEquals('tabby', $methods[0]->id);
+        $this->assertEquals('Pay later with Tabby', $methods[0]->name);
     }
 
     public function test_tabby_eligibility_service_method()
     {
         // Mock eligibility check
         Http::fake([
-            "https://api.tabby.ai/api/v2/checkout" => Http::response(
+            'https://api.tabby.ai/api/v2/checkout' => Http::response(
                 [
-                    "status" => "created",
-                    "configuration" => [
-                        "products" => [
-                            "installments" => [
-                                "rejection_reason" => null,
+                    'status' => 'created',
+                    'configuration' => [
+                        'products' => [
+                            'installments' => [
+                                'rejection_reason' => null,
                             ],
                         ],
                     ],
@@ -319,17 +322,17 @@ class TabbyCheckoutTest extends TestCase
         $tabbyService = app(TabbyPaymentGatewayService::class);
 
         $result = $tabbyService->checkEligibility(
-            \Brick\Money\Money::of(1000, "SAR"),
+            \Brick\Money\Money::of(1000, 'SAR'),
             [
-                "email" => "otp.success@tabby.ai",
-                "phone" => "+966500000001",
-                "name" => "Test Customer",
+                'email' => 'otp.success@tabby.ai',
+                'phone' => '+966500000001',
+                'name' => 'Test Customer',
             ],
         );
 
-        $this->assertArrayHasKey("eligible", $result);
-        $this->assertArrayHasKey("status", $result);
-        $this->assertTrue($result["eligible"]);
-        $this->assertEquals("created", $result["status"]);
+        $this->assertArrayHasKey('eligible', $result);
+        $this->assertArrayHasKey('status', $result);
+        $this->assertTrue($result['eligible']);
+        $this->assertEquals('created', $result['status']);
     }
 }

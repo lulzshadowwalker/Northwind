@@ -15,9 +15,9 @@ class ProductController extends Controller
         if ($request->has('sort')) {
             $sort = $request->input('sort');
             if ($sort === 'name_asc') {
-                $query->orderBy('name_' . app()->getLocale(), 'asc');
+                $query->orderBy('name_'.app()->getLocale(), 'asc');
             } elseif ($sort === 'name_desc') {
-                $query->orderBy('name_' . app()->getLocale(), 'desc');
+                $query->orderBy('name_'.app()->getLocale(), 'desc');
             }
         }
 

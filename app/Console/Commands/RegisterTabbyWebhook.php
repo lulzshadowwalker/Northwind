@@ -22,107 +22,110 @@ class RegisterTabbyWebhook extends Command
      *
      * @var string
      */
-    protected $description = "Register webhook with Tabby API";
+    protected $description = 'Register webhook with Tabby API';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->info("🔗 Registering Tabby Webhook...");
+        $this->info('🔗 Registering Tabby Webhook...');
         $this->newLine();
 
         // Get configuration
-        $baseUrl = config("services.tabby.base_url");
-        $secretKey = config("services.tabby.secret_key");
-        $merchantCode = config("services.tabby.merchant_code");
+        $baseUrl = config('services.tabby.base_url');
+        $secretKey = config('services.tabby.secret_key');
+        $merchantCode = config('services.tabby.merchant_code');
 
-        if (!$secretKey || !$merchantCode) {
+        if (! $secretKey || ! $merchantCode) {
             $this->error(
-                "❌ Missing Tabby configuration. Please set TABBY_SECRET_KEY and TABBY_MERCHANT_CODE in .env",
+                '❌ Missing Tabby configuration. Please set TABBY_SECRET_KEY and TABBY_MERCHANT_CODE in .env',
             );
+
             return 1;
         }
 
         // Get or generate webhook URL
         $webhookUrl =
-            $this->option("url") ?? config("app.url") . "/api/webhooks/tabby";
+            $this->option('url') ?? config('app.url').'/api/webhooks/tabby';
 
         $this->info("📍 Webhook URL: {$webhookUrl}");
         $this->newLine();
 
         // Generate or get signature
-        $signatureHeader = "X-Tabby-Signature";
-        $signatureValue = $this->option("generate-signature")
+        $signatureHeader = 'X-Tabby-Signature';
+        $signatureValue = $this->option('generate-signature')
             ? Str::random(64)
-            : config("services.tabby.webhook_signature_value");
+            : config('services.tabby.webhook_signature_value');
 
-        if (!$signatureValue) {
+        if (! $signatureValue) {
             $this->warn(
-                "⚠️  No signature configured. Generating random signature...",
+                '⚠️  No signature configured. Generating random signature...',
             );
             $signatureValue = Str::random(64);
         }
 
         // Prepare payload
         $payload = [
-            "url" => $webhookUrl,
-            "header" => [
-                "title" => $signatureHeader,
-                "value" => $signatureValue,
+            'url' => $webhookUrl,
+            'header' => [
+                'title' => $signatureHeader,
+                'value' => $signatureValue,
             ],
         ];
 
         // Make API request
-        $this->info("📤 Sending registration request to Tabby...");
+        $this->info('📤 Sending registration request to Tabby...');
 
         try {
             $response = Http::withHeaders([
-                "Authorization" => "Bearer " . $secretKey,
-                "Content-Type" => "application/json",
-                "X-Merchant-Code" => $merchantCode,
-            ])->post($baseUrl . "/api/v1/webhooks", $payload);
+                'Authorization' => 'Bearer '.$secretKey,
+                'Content-Type' => 'application/json',
+                'X-Merchant-Code' => $merchantCode,
+            ])->post($baseUrl.'/api/v1/webhooks', $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
 
                 $this->newLine();
-                $this->info("✅ Webhook registered successfully!");
+                $this->info('✅ Webhook registered successfully!');
                 $this->newLine();
 
-                $this->line("📋 Webhook Details:");
+                $this->line('📋 Webhook Details:');
                 $this->table(
-                    ["Key", "Value"],
+                    ['Key', 'Value'],
                     [
-                        ["Webhook ID", $data["id"] ?? "N/A"],
-                        ["URL", $data["url"] ?? $webhookUrl],
-                        ["Is Test", $data["is_test"] ?? false ? "Yes" : "No"],
-                        ["Signature Header", $signatureHeader],
+                        ['Webhook ID', $data['id'] ?? 'N/A'],
+                        ['URL', $data['url'] ?? $webhookUrl],
+                        ['Is Test', $data['is_test'] ?? false ? 'Yes' : 'No'],
+                        ['Signature Header', $signatureHeader],
                     ],
                 );
 
                 $this->newLine();
                 $this->warn(
-                    "⚠️  IMPORTANT: Add the following to your .env file:",
+                    '⚠️  IMPORTANT: Add the following to your .env file:',
                 );
                 $this->newLine();
                 $this->line(
-                    "TABBY_WEBHOOK_SIGNATURE_HEADER=" . $signatureHeader,
+                    'TABBY_WEBHOOK_SIGNATURE_HEADER='.$signatureHeader,
                 );
-                $this->line("TABBY_WEBHOOK_SIGNATURE_VALUE=" . $signatureValue);
+                $this->line('TABBY_WEBHOOK_SIGNATURE_VALUE='.$signatureValue);
                 $this->newLine();
 
-                $this->info("Then run: php artisan config:clear");
+                $this->info('Then run: php artisan config:clear');
 
                 return 0;
             } else {
-                $this->error("❌ Failed to register webhook");
-                $this->error("Status: " . $response->status());
-                $this->error("Response: " . $response->body());
+                $this->error('❌ Failed to register webhook');
+                $this->error('Status: '.$response->status());
+                $this->error('Response: '.$response->body());
+
                 return 1;
             }
         } catch (\Exception $e) {
-            $this->error("❌ Exception occurred: " . $e->getMessage());
+            $this->error('❌ Exception occurred: '.$e->getMessage());
+
             return 1;
         }
     }

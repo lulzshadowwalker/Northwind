@@ -20,29 +20,29 @@ class Payment extends Model
     use HasFactory;
 
     protected $fillable = [
-        "external_reference",
-        "gateway",
-        "status",
-        "user_id",
-        "payable_type",
-        "payable_id",
-        "details",
-        "amount",
-        "currency",
-        "captured_at",
+        'external_reference',
+        'gateway',
+        'status',
+        'user_id',
+        'payable_type',
+        'payable_id',
+        'details',
+        'amount',
+        'currency',
+        'captured_at',
     ];
 
     protected function casts(): array
     {
         return [
-            "status" => PaymentStatus::class,
-            "gateway" => PaymentGateway::class,
-            "details" => "array",
-            "price" => MoneyCast::class,
-            "money" => MoneyCast::class . ":amount,currency",
-            "external_reference" => "string",
-            "currency" => "string",
-            "amount" => "decimal:2",
+            'status' => PaymentStatus::class,
+            'gateway' => PaymentGateway::class,
+            'details' => 'array',
+            'price' => MoneyCast::class,
+            'money' => MoneyCast::class.':amount,currency',
+            'external_reference' => 'string',
+            'currency' => 'string',
+            'amount' => 'decimal:2',
         ];
     }
 
@@ -59,17 +59,17 @@ class Payment extends Model
 
     public function isPending(): Attribute
     {
-        return Attribute::get(fn() => $this->status === PaymentStatus::pending);
+        return Attribute::get(fn () => $this->status === PaymentStatus::pending);
     }
 
     public function isPaid(): Attribute
     {
-        return Attribute::get(fn() => $this->status === PaymentStatus::paid);
+        return Attribute::get(fn () => $this->status === PaymentStatus::paid);
     }
 
     public function isFailed(): Attribute
     {
-        return Attribute::get(fn() => $this->status === PaymentStatus::failed);
+        return Attribute::get(fn () => $this->status === PaymentStatus::failed);
     }
 
     public function payable(): MorphTo

@@ -19,10 +19,10 @@ class CategoryFactory extends BaseFactory
     public function definition(): array
     {
         return [
-            "name" => $this->localized(
-                fn(): string => fake()->unique()->sentence(2, 3)
+            'name' => $this->localized(
+                fn (): string => fake()->unique()->sentence(2, 3)
             ),
-            "slug" => fake()->unique()->slug(),
+            'slug' => fake()->unique()->slug(),
         ];
     }
 }

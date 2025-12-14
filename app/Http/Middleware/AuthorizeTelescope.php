@@ -15,7 +15,7 @@ class AuthorizeTelescope
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth('admin')->check()) {
+        if (! auth('admin')->check()) {
             return redirect()->guest(route('filament.admin.auth.login'));
         }
 

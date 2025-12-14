@@ -9,25 +9,25 @@ use Closure;
 
 enum PaymentGateway: string
 {
-    case myfatoorah = "myfatoorah"; // Deprecated - will be removed
-    case tabby = "tabby";
-    case hyperpay = "hyperpay";
+    case myfatoorah = 'myfatoorah'; // Deprecated - will be removed
+    case tabby = 'tabby';
+    case hyperpay = 'hyperpay';
 
     public function label(): string
     {
         return match ($this) {
-            self::myfatoorah => "MyFatoorah (Deprecated)",
-            self::tabby => "Tabby",
-            self::hyperpay => "HyperPay",
+            self::myfatoorah => 'MyFatoorah (Deprecated)',
+            self::tabby => 'Tabby',
+            self::hyperpay => 'HyperPay',
         };
     }
 
     public function icons(): string
     {
         return match ($this) {
-            self::myfatoorah => "heroicon-o-credit-card",
-            self::tabby => "heroicon-o-credit-card",
-            self::hyperpay => "heroicon-o-credit-card",
+            self::myfatoorah => 'heroicon-o-credit-card',
+            self::tabby => 'heroicon-o-credit-card',
+            self::hyperpay => 'heroicon-o-credit-card',
         };
     }
 
@@ -40,6 +40,6 @@ enum PaymentGateway: string
 
     public static function values(): array
     {
-        return array_map(fn($e) => $e->value, self::cases());
+        return array_map(fn ($e) => $e->value, self::cases());
     }
 }

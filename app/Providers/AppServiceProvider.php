@@ -29,10 +29,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(function (SocialiteWasCalled $event) {
-            $event->extendSocialite("google", Provider::class);
+            $event->extendSocialite('google', Provider::class);
         });
 
-        Gate::define("viewPulse", function ($user) {
+        Gate::define('viewPulse', function ($user) {
             return true;
         });
 

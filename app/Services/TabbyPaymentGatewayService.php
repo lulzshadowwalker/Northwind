@@ -13,25 +13,28 @@ use Brick\Money\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TabbyPaymentGatewayService implements PaymentGatewayService
 {
     protected string $baseUrl;
+
     protected string $secretKey;
+
     protected string $publicKey;
+
     protected string $merchantCode;
 
     public function __construct()
     {
         $this->baseUrl = config(
-            "services.tabby.base_url",
-            "https://api.tabby.ai",
+            'services.tabby.base_url',
+            'https://api.tabby.ai',
         );
-        $this->secretKey = config("services.tabby.secret_key");
-        $this->publicKey = config("services.tabby.public_key");
-        $this->merchantCode = config("services.tabby.merchant_code", "NWSA");
+        $this->secretKey = config('services.tabby.secret_key');
+        $this->publicKey = config('services.tabby.public_key');
+        $this->merchantCode = config('services.tabby.merchant_code', 'NWSA');
     }
 
     /**
@@ -61,7 +64,7 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
             if (is_string($user->phone)) {
                 $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
                 try {
-                    $phoneNumber = $phoneUtil->parse($user->phone, "SA"); // Default to Saudi Arabia
+                    $phoneNumber = $phoneUtil->parse($user->phone, 'SA'); // Default to Saudi Arabia
                     $phone = $phoneUtil->format(
                         $phoneNumber,
                         \libphonenumber\PhoneNumberFormat::E164,
@@ -88,14 +91,14 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
 
         // Load order items with product and category relationships if this is an Order
         if ($payable instanceof \App\Models\Order) {
-            $payable->load("orderItems.product.category");
+            $payable->load('orderItems.product.category');
         }
 
         // Prepare order items for Tabby
         $orderItems = Arr::map($payable->items(), function ($item, $index) use (
             $payable,
         ) {
-            $category = "General"; // Default category
+            $category = 'General'; // Default category
 
             // Try to get actual category from product if this is an Order
             if ($payable instanceof \App\Models\Order) {
@@ -107,199 +110,197 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
                 ) {
                     $category =
                         $orderItem->product->category->getTranslation(
-                            "name",
-                            "en",
+                            'name',
+                            'en',
                         ) ?? $category;
                 }
             }
 
             return [
-                "title" => $item->name(),
-                "quantity" => $item->quantity(),
-                "unit_price" => (string) $item->price()->getAmount(),
-                "category" => $category,
+                'title' => $item->name(),
+                'quantity' => $item->quantity(),
+                'unit_price' => (string) $item->price()->getAmount(),
+                'category' => $category,
             ];
         });
 
-        $dob = $user->date_of_birth?->format("Y-m-d");
+        $dob = $user->date_of_birth?->format('Y-m-d');
 
         // Build shipping address from order if available
         $shippingAddress = null;
         if ($payable instanceof \App\Models\Order && $payable->shipping_city) {
             $shippingAddress = [
-                "city" => $payable->shipping_city,
-                "address" => $payable->shipping_address ?? "",
-                "zip" => $payable->shipping_zip ?? "",
+                'city' => $payable->shipping_city,
+                'address' => $payable->shipping_address ?? '',
+                'zip' => $payable->shipping_zip ?? '',
             ];
         }
 
         // Prepare payload for Tabby session creation
         $payload = [
-            "payment" => [
-                "amount" => $amount->toScale(
+            'payment' => [
+                'amount' => $amount->toScale(
                     2,
                     \Brick\Math\RoundingMode::HALF_UP,
                 ),
-                "currency" => $payable
+                'currency' => $payable
                     ->price()
                     ->getCurrency()
                     ->getCurrencyCode(),
-                "buyer" => [
-                    "phone" => $phone,
-                    "email" => $user->email,
-                    "name" => $user->name,
+                'buyer' => [
+                    'phone' => $phone,
+                    'email' => $user->email,
+                    'name' => $user->name,
                 ],
-                "order" => [
-                    "reference_id" =>
-                        $payable instanceof \App\Models\Order
+                'order' => [
+                    'reference_id' => $payable instanceof \App\Models\Order
                             ? (string) $payable->id
-                            : uniqid("order_"),
-                    "items" => $orderItems,
+                            : uniqid('order_'),
+                    'items' => $orderItems,
                 ],
-                "buyer_history" => [
-                    "registered_since" => $user->created_at->toIso8601String(),
-                    "loyalty_level" => $user->customer
+                'buyer_history' => [
+                    'registered_since' => $user->created_at->toIso8601String(),
+                    'loyalty_level' => $user->customer
                         ? $user->customer->orders()->count()
                         : 0,
                 ],
-                "order_history" => $this->getOrderHistory(
+                'order_history' => $this->getOrderHistory(
                     $user,
                     $payable instanceof \App\Models\Order ? $payable->id : null,
                 ),
             ],
-            "lang" => app()->getLocale() === "ar" ? "ar" : "en",
-            "merchant_code" => $this->merchantCode,
-            "merchant_urls" => [
-                "success" => route("payments.callback", [
-                    "language" => app()->getLocale(),
+            'lang' => app()->getLocale() === 'ar' ? 'ar' : 'en',
+            'merchant_code' => $this->merchantCode,
+            'merchant_urls' => [
+                'success' => route('payments.callback', [
+                    'language' => app()->getLocale(),
                 ]),
-                "cancel" => route("payments.callback", [
-                    "language" => app()->getLocale(),
+                'cancel' => route('payments.callback', [
+                    'language' => app()->getLocale(),
                 ]),
-                "failure" => route("payments.callback", [
-                    "language" => app()->getLocale(),
+                'failure' => route('payments.callback', [
+                    'language' => app()->getLocale(),
                 ]),
             ],
         ];
 
         // Add optional fields only if they have values
         if ($dob) {
-            $payload["payment"]["buyer"]["dob"] = $dob;
+            $payload['payment']['buyer']['dob'] = $dob;
         }
 
         if ($shippingAddress) {
-            $payload["payment"]["shipping_address"] = $shippingAddress;
+            $payload['payment']['shipping_address'] = $shippingAddress;
         }
 
         // Make API call to create session
         $response = Http::withHeaders([
-            "Authorization" => "Bearer " . $this->secretKey,
-            "Content-Type" => "application/json",
-        ])->post($this->baseUrl . "/api/v2/checkout", $payload);
+            'Authorization' => 'Bearer '.$this->secretKey,
+            'Content-Type' => 'application/json',
+        ])->post($this->baseUrl.'/api/v2/checkout', $payload);
 
-        if (!$response->successful()) {
-            Log::error("Tabby session creation failed", [
-                "response" => $response->body(),
-                "payload" => $payload,
+        if (! $response->successful()) {
+            Log::error('Tabby session creation failed', [
+                'response' => $response->body(),
+                'payload' => $payload,
             ]);
-            throw new \Exception("Failed to create Tabby payment session");
+            throw new \Exception('Failed to create Tabby payment session');
         }
 
         $data = $response->json();
 
         // Validate response structure
-        if (!is_array($data)) {
-            Log::error("Tabby API returned non-array response", [
-                "response_type" => gettype($data),
-                "response_body" => $response->body(),
+        if (! is_array($data)) {
+            Log::error('Tabby API returned non-array response', [
+                'response_type' => gettype($data),
+                'response_body' => $response->body(),
             ]);
-            throw new \Exception("Invalid response from Tabby API");
+            throw new \Exception('Invalid response from Tabby API');
         }
 
-        if ($data["status"] !== "created") {
-            Log::error("Tabby session not created", ["response" => $data]);
-            throw new \Exception("Customer not eligible for Tabby payment");
+        if ($data['status'] !== 'created') {
+            Log::error('Tabby session not created', ['response' => $data]);
+            throw new \Exception('Customer not eligible for Tabby payment');
         }
 
-        $paymentId = $data["payment"]["id"];
+        $paymentId = $data['payment']['id'];
 
         // Check for installments in the correct location
         // Tabby API returns installments under configuration.products.installments
         $installments =
-            $data["configuration"]["products"]["installments"] ?? null;
+            $data['configuration']['products']['installments'] ?? null;
 
         // If installments exist and are available, get the web_url
         if (
             $installments &&
-            isset($installments["is_available"]) &&
-            $installments["is_available"]
+            isset($installments['is_available']) &&
+            $installments['is_available']
         ) {
             // For successful sessions, installments might be in available_products
             $availableInstallments =
-                $data["configuration"]["available_products"]["installments"] ??
+                $data['configuration']['available_products']['installments'] ??
                 [];
             if (
-                !empty($availableInstallments) &&
-                isset($availableInstallments[0]["web_url"])
+                ! empty($availableInstallments) &&
+                isset($availableInstallments[0]['web_url'])
             ) {
-                $webUrl = $availableInstallments[0]["web_url"];
+                $webUrl = $availableInstallments[0]['web_url'];
             } else {
                 Log::error(
-                    "Tabby session created but no web_url in available products",
+                    'Tabby session created but no web_url in available products',
                     [
-                        "response" => $data,
-                        "payment_id" => $paymentId,
+                        'response' => $data,
+                        'payment_id' => $paymentId,
                     ],
                 );
-                throw new \Exception("Payment URL not available from Tabby");
+                throw new \Exception('Payment URL not available from Tabby');
             }
         } else {
             // If installments are not available, throw appropriate error
-            $rejectionReason = $installments["rejection_reason"] ?? "unknown";
-            Log::error("Tabby installments not available", [
-                "response" => $data,
-                "payment_id" => $paymentId,
-                "rejection_reason" => $rejectionReason,
+            $rejectionReason = $installments['rejection_reason'] ?? 'unknown';
+            Log::error('Tabby installments not available', [
+                'response' => $data,
+                'payment_id' => $paymentId,
+                'rejection_reason' => $rejectionReason,
             ]);
             throw new \Exception(
-                "Installments not available: " . $rejectionReason,
+                'Installments not available: '.$rejectionReason,
             );
         }
 
         // Create payment record
         try {
             // Payments relationship should be available on Payable implementations
-            if (!$payable instanceof \App\Models\Order) {
+            if (! $payable instanceof \App\Models\Order) {
                 throw new \Exception(
-                    "Tabby payment only supports Order payables",
+                    'Tabby payment only supports Order payables',
                 );
             }
 
             $payment = $payable->payments()->create([
-                "user_id" => Auth::user()->id,
-                "external_reference" => $paymentId,
-                "gateway" => PaymentGateway::tabby,
-                "amount" => $payable->price()->getAmount(),
-                "currency" => $payable
+                'user_id' => Auth::user()->id,
+                'external_reference' => $paymentId,
+                'gateway' => PaymentGateway::tabby,
+                'amount' => $payable->price()->getAmount(),
+                'currency' => $payable
                     ->price()
                     ->getCurrency()
                     ->getCurrencyCode(),
-                "details" => $data,
+                'details' => $data,
             ]);
 
             return $this->validateReturnArray(
                 [$payment, $webUrl],
-                "start_method",
+                'start_method',
             );
         } catch (\Exception $e) {
-            Log::error("Failed to create Tabby payment record", [
-                "error" => $e->getMessage(),
-                "payable_type" => get_class($payable),
-                "payable_id" =>
-                    $payable instanceof \App\Models\Order
+            Log::error('Failed to create Tabby payment record', [
+                'error' => $e->getMessage(),
+                'payable_type' => get_class($payable),
+                'payable_id' => $payable instanceof \App\Models\Order
                         ? $payable->id
-                        : "unknown",
-                "payment_id" => $paymentId,
+                        : 'unknown',
+                'payment_id' => $paymentId,
             ]);
             throw $e;
         }
@@ -308,40 +309,40 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
     /**
      * Validate and ensure proper return format
      */
-    private function validateReturnArray($result, $context = "unknown"): array
+    private function validateReturnArray($result, $context = 'unknown'): array
     {
-        if (!is_array($result)) {
-            Log::error("Tabby service returned non-array", [
-                "context" => $context,
-                "result_type" => gettype($result),
-                "result_value" => $result,
+        if (! is_array($result)) {
+            Log::error('Tabby service returned non-array', [
+                'context' => $context,
+                'result_type' => gettype($result),
+                'result_value' => $result,
             ]);
             throw new \Exception(
-                "Tabby service returned invalid response type",
+                'Tabby service returned invalid response type',
             );
         }
 
         if (count($result) !== 2) {
-            Log::error("Tabby service returned array with wrong count", [
-                "context" => $context,
-                "expected_count" => 2,
-                "actual_count" => count($result),
-                "result" => $result,
+            Log::error('Tabby service returned array with wrong count', [
+                'context' => $context,
+                'expected_count' => 2,
+                'actual_count' => count($result),
+                'result' => $result,
             ]);
             throw new \Exception(
-                "Tabby service returned array with wrong element count",
+                'Tabby service returned array with wrong element count',
             );
         }
 
-        if (!isset($result[0]) || !isset($result[1])) {
-            Log::error("Tabby service returned array with missing keys", [
-                "context" => $context,
-                "has_key_0" => isset($result[0]),
-                "has_key_1" => isset($result[1]),
-                "result" => $result,
+        if (! isset($result[0]) || ! isset($result[1])) {
+            Log::error('Tabby service returned array with missing keys', [
+                'context' => $context,
+                'has_key_0' => isset($result[0]),
+                'has_key_1' => isset($result[1]),
+                'result' => $result,
             ]);
             throw new \Exception(
-                "Tabby service returned array with missing required elements",
+                'Tabby service returned array with missing required elements',
             );
         }
 
@@ -353,51 +354,51 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
      */
     public function callback(Request $request): Payment
     {
-        Log::info("Tabby callback received", $request->all());
+        Log::info('Tabby callback received', $request->all());
 
-        $paymentId = $request->get("payment_id");
+        $paymentId = $request->get('payment_id');
 
-        if (!$paymentId) {
-            throw new \Exception("Payment ID not provided in callback");
+        if (! $paymentId) {
+            throw new \Exception('Payment ID not provided in callback');
         }
 
         // Retrieve payment status from Tabby
         $response = Http::withHeaders([
-            "Authorization" => "Bearer " . $this->secretKey,
-        ])->get($this->baseUrl . "/api/v2/payments/" . $paymentId);
+            'Authorization' => 'Bearer '.$this->secretKey,
+        ])->get($this->baseUrl.'/api/v2/payments/'.$paymentId);
 
-        if (!$response->successful()) {
-            Log::error("Failed to retrieve Tabby payment status", [
-                "payment_id" => $paymentId,
-                "response" => $response->body(),
+        if (! $response->successful()) {
+            Log::error('Failed to retrieve Tabby payment status', [
+                'payment_id' => $paymentId,
+                'response' => $response->body(),
             ]);
-            throw new \Exception("Failed to verify payment status");
+            throw new \Exception('Failed to verify payment status');
         }
 
         $paymentData = $response->json();
 
         // Find our payment record
-        $payment = Payment::where("external_reference", $paymentId)->first();
+        $payment = Payment::where('external_reference', $paymentId)->first();
 
-        if (!$payment) {
-            Log::error("Payment not found", ["payment_id" => $paymentId]);
-            throw new \Exception("Payment record not found");
+        if (! $payment) {
+            Log::error('Payment not found', ['payment_id' => $paymentId]);
+            throw new \Exception('Payment record not found');
         }
 
         $payment->details = $paymentData;
 
         // Map Tabby status to our status
-        switch ($paymentData["status"]) {
-            case "AUTHORIZED":
+        switch ($paymentData['status']) {
+            case 'AUTHORIZED':
                 $payment->status = PaymentStatus::paid;
                 break;
-            case "REJECTED":
+            case 'REJECTED':
                 $payment->status = PaymentStatus::failed;
                 break;
-            case "EXPIRED":
+            case 'EXPIRED':
                 $payment->status = PaymentStatus::cancelled;
                 break;
-            case "CLOSED":
+            case 'CLOSED':
                 $payment->status = PaymentStatus::paid;
                 break;
             default:
@@ -407,22 +408,22 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
         $payment->save();
 
         // If payment is authorized, capture it
-        if ($paymentData["status"] === "AUTHORIZED" && !$payment->captured_at) {
+        if ($paymentData['status'] === 'AUTHORIZED' && ! $payment->captured_at) {
             $this->capture($payment);
         }
 
         // Clear customer's cart for successful payments
-        if (in_array($paymentData["status"], ["AUTHORIZED", "CLOSED"])) {
+        if (in_array($paymentData['status'], ['AUTHORIZED', 'CLOSED'])) {
             $customer = $payment->payable->customer;
             if ($customer && $customer->cart) {
                 $customer->cart->cartItems()->delete();
             }
         }
 
-        Log::info("Tabby callback processed", [
-            "payment_id" => $payment->id,
-            "external_reference" => $paymentId,
-            "status" => $paymentData["status"],
+        Log::info('Tabby callback processed', [
+            'payment_id' => $payment->id,
+            'external_reference' => $paymentId,
+            'status' => $paymentData['status'],
         ]);
 
         return $payment;
@@ -436,14 +437,15 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
         try {
             // 1. Retrieve the payment from Tabby to get the authoritative amount
             $response = Http::withHeaders([
-                "Authorization" => "Bearer " . $this->secretKey,
-            ])->get($this->baseUrl . "/api/v2/payments/" . $payment->external_reference);
+                'Authorization' => 'Bearer '.$this->secretKey,
+            ])->get($this->baseUrl.'/api/v2/payments/'.$payment->external_reference);
 
-            if (!$response->successful()) {
-                Log::error("Failed to retrieve payment details for capture", [
-                    "payment_id" => $payment->id,
-                    "response" => $response->body(),
+            if (! $response->successful()) {
+                Log::error('Failed to retrieve payment details for capture', [
+                    'payment_id' => $payment->id,
+                    'response' => $response->body(),
                 ]);
+
                 return;
             }
 
@@ -452,48 +454,48 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
 
             // 2. Send the Capture Request with the correct amount and string reference_id
             $payload = [
-                "amount" => (string) $authorizedAmount,
-                "reference_id" => (string) $payment->payable->id, // Ensure string
+                'amount' => (string) $authorizedAmount,
+                'reference_id' => (string) $payment->payable->id, // Ensure string
             ];
 
             $captureResponse = Http::withHeaders([
-                "Authorization" => "Bearer " . $this->secretKey,
-                "Content-Type" => "application/json",
+                'Authorization' => 'Bearer '.$this->secretKey,
+                'Content-Type' => 'application/json',
             ])->post(
-                $this->baseUrl .
-                    "/api/v2/payments/" .
-                    $payment->external_reference .
-                    "/captures",
+                $this->baseUrl.
+                    '/api/v2/payments/'.
+                    $payment->external_reference.
+                    '/captures',
                 $payload,
             );
 
             if ($captureResponse->successful()) {
                 $updates = ['captured_at' => now()];
-                
+
                 // Update local amount to match what was actually captured if different
                 if ($payment->amount != $authorizedAmount) {
-                     Log::warning("Payment amount mismatch corrected during capture", [
-                        "local_amount" => $payment->amount,
-                        "captured_amount" => $authorizedAmount
-                     ]);
-                     $updates['amount'] = $authorizedAmount;
+                    Log::warning('Payment amount mismatch corrected during capture', [
+                        'local_amount' => $payment->amount,
+                        'captured_amount' => $authorizedAmount,
+                    ]);
+                    $updates['amount'] = $authorizedAmount;
                 }
-                
+
                 $payment->update($updates);
-                
-                Log::info("Payment captured successfully", [
-                    "payment_id" => $payment->id,
+
+                Log::info('Payment captured successfully', [
+                    'payment_id' => $payment->id,
                 ]);
             } else {
-                Log::error("Payment capture failed", [
-                    "payment_id" => $payment->id,
-                    "response" => $captureResponse->body(),
+                Log::error('Payment capture failed', [
+                    'payment_id' => $payment->id,
+                    'response' => $captureResponse->body(),
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error("Payment capture exception", [
-                "payment_id" => $payment->id,
-                "error" => $e->getMessage(),
+            Log::error('Payment capture exception', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -504,11 +506,11 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
     public function checkEligibility(Money $amount, array $buyer): array
     {
         // Parse phone number if provided
-        $phone = $buyer["phone"] ?? null;
+        $phone = $buyer['phone'] ?? null;
         if ($phone && is_string($phone)) {
             $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
             try {
-                $phoneNumber = $phoneUtil->parse($phone, "SA"); // Default to Saudi Arabia
+                $phoneNumber = $phoneUtil->parse($phone, 'SA'); // Default to Saudi Arabia
                 $phone = $phoneUtil->format(
                     $phoneNumber,
                     \libphonenumber\PhoneNumberFormat::E164,
@@ -522,46 +524,46 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
         // Calculate amount including 15% VAT for eligibility check
         $totalWithTax = $amount
             ->getAmount()
-            ->multipliedBy(BigDecimal::of("1.15"));
+            ->multipliedBy(BigDecimal::of('1.15'));
 
         $payload = [
-            "payment" => [
-                "amount" => $totalWithTax->toScale(
+            'payment' => [
+                'amount' => $totalWithTax->toScale(
                     2,
                     \Brick\Math\RoundingMode::HALF_UP,
                 ),
-                "currency" => $amount->getCurrency()->getCurrencyCode(),
-                "buyer" => [
-                    "phone" => $phone,
-                    "email" => $buyer["email"] ?? null,
-                    "name" => $buyer["name"] ?? "Customer",
+                'currency' => $amount->getCurrency()->getCurrencyCode(),
+                'buyer' => [
+                    'phone' => $phone,
+                    'email' => $buyer['email'] ?? null,
+                    'name' => $buyer['name'] ?? 'Customer',
                 ],
             ],
-            "lang" => app()->getLocale() === "ar" ? "ar" : "en",
-            "merchant_code" => $this->merchantCode,
+            'lang' => app()->getLocale() === 'ar' ? 'ar' : 'en',
+            'merchant_code' => $this->merchantCode,
         ];
 
         $response = Http::withHeaders([
-            "Authorization" => "Bearer " . $this->secretKey,
-            "Content-Type" => "application/json",
-        ])->post($this->baseUrl . "/api/v2/checkout", $payload);
+            'Authorization' => 'Bearer '.$this->secretKey,
+            'Content-Type' => 'application/json',
+        ])->post($this->baseUrl.'/api/v2/checkout', $payload);
 
-        if (!$response->successful()) {
-            Log::error("Tabby eligibility check failed", [
-                "response" => $response->body(),
-                "payload" => $payload,
+        if (! $response->successful()) {
+            Log::error('Tabby eligibility check failed', [
+                'response' => $response->body(),
+                'payload' => $payload,
             ]);
-            return ["eligible" => false, "reason" => "api_error"];
+
+            return ['eligible' => false, 'reason' => 'api_error'];
         }
 
         $data = $response->json();
 
         return [
-            "eligible" => $data["status"] === "created",
-            "status" => $data["status"],
-            "reason" =>
-                $data["configuration"]["products"]["installments"][
-                    "rejection_reason"
+            'eligible' => $data['status'] === 'created',
+            'status' => $data['status'],
+            'reason' => $data['configuration']['products']['installments'][
+                    'rejection_reason'
                 ] ?? null,
         ];
     }
@@ -570,27 +572,26 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
      * Get customer order history for Tabby
      * Returns 5-10 previous orders (current order excluded)
      *
-     * @param \App\Models\User $user
-     * @param int|null $currentOrderId Order ID to exclude from history
-     * @return array
+     * @param  \App\Models\User  $user
+     * @param  int|null  $currentOrderId  Order ID to exclude from history
      */
     protected function getOrderHistory($user, $currentOrderId = null): array
     {
-        if (!$user->customer) {
+        if (! $user->customer) {
             return [];
         }
 
         // Get up to 10 previous orders, excluding current order
         $query = $user->customer
             ->orders()
-            ->with("orderItems.product.category") // Eager load relationships
-            ->whereNotNull("created_at")
-            ->orderBy("created_at", "desc")
+            ->with('orderItems.product.category') // Eager load relationships
+            ->whereNotNull('created_at')
+            ->orderBy('created_at', 'desc')
             ->limit(10);
 
         // Exclude current order if provided
         if ($currentOrderId) {
-            $query->where("id", "!=", $currentOrderId);
+            $query->where('id', '!=', $currentOrderId);
         }
 
         $orders = $query->get();
@@ -599,38 +600,37 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
             ->map(function ($order) use ($user) {
                 // Calculate order total using unit_price (decimal) not price (Money cast)
                 $total = $order->orderItems->reduce(
-                    fn($carry, $item) => $carry +
+                    fn ($carry, $item) => $carry +
                         $item->unit_price * $item->quantity,
                     0,
                 );
 
                 $orderData = [
-                    "purchased_at" => $order->created_at->toIso8601String(),
-                    "amount" => number_format($total, 2, ".", ""),
-                    "status" => $order->status?->value ?? "unknown",
-                    "buyer" => [
-                        "phone" => $user->phone ?? "",
-                        "email" => $user->email,
-                        "name" => $user->name,
+                    'purchased_at' => $order->created_at->toIso8601String(),
+                    'amount' => number_format($total, 2, '.', ''),
+                    'status' => $order->status?->value ?? 'unknown',
+                    'buyer' => [
+                        'phone' => $user->phone ?? '',
+                        'email' => $user->email,
+                        'name' => $user->name,
                     ],
-                    "items" => $order->orderItems
+                    'items' => $order->orderItems
                         ->map(
-                            fn($item) => [
-                                "title" => $item->product->name ?? "Product",
-                                "quantity" => $item->quantity,
-                                "unit_price" => number_format(
+                            fn ($item) => [
+                                'title' => $item->product->name ?? 'Product',
+                                'quantity' => $item->quantity,
+                                'unit_price' => number_format(
                                     $item->unit_price,
                                     2,
-                                    ".",
-                                    "",
+                                    '.',
+                                    '',
                                 ),
-                                "category" =>
-                                    $item->product && $item->product->category
+                                'category' => $item->product && $item->product->category
                                         ? $item->product->category->getTranslation(
-                                            "name",
-                                            "en",
+                                            'name',
+                                            'en',
                                         )
-                                        : "General",
+                                        : 'General',
                             ],
                         )
                         ->toArray(),
@@ -638,10 +638,10 @@ class TabbyPaymentGatewayService implements PaymentGatewayService
 
                 // Only include shipping address if it exists in the order
                 if ($order->shipping_city) {
-                    $orderData["shipping_address"] = [
-                        "city" => $order->shipping_city,
-                        "address" => $order->shipping_address ?? "",
-                        "zip" => $order->shipping_zip ?? "",
+                    $orderData['shipping_address'] = [
+                        'city' => $order->shipping_city,
+                        'address' => $order->shipping_address ?? '',
+                        'zip' => $order->shipping_zip ?? '',
                     ];
                 }
 

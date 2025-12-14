@@ -17,22 +17,25 @@ class TabbyCaptureFixTest extends TestCase
     use RefreshDatabase;
 
     protected TabbyPaymentGatewayService $tabbyService;
+
     protected User $user;
+
     protected Order $order;
+
     protected Payment $payment;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->tabbyService = app(TabbyPaymentGatewayService::class);
-        
+
         $this->user = User::factory()->create();
         $customer = \App\Models\Customer::factory()->create(['user_id' => $this->user->id]);
-        
+
         // Create a dummy order
         $this->order = Order::factory()->create([
             'customer_id' => $customer->id,
-            'total' => 573.85 // The "wrong" local amount from the email example
+            'total' => 573.85, // The "wrong" local amount from the email example
         ]);
 
         // Create a payment record linked to this order
@@ -69,7 +72,7 @@ class TabbyCaptureFixTest extends TestCase
             '*/api/v2/payments/payment_id_123/captures' => Http::response([
                 'id' => 'capture_123',
                 'amount' => '499.00',
-                'status' => 'CLOSED'
+                'status' => 'CLOSED',
             ], 200),
         ]);
 
@@ -77,17 +80,17 @@ class TabbyCaptureFixTest extends TestCase
         $this->tabbyService->capture($this->payment);
 
         // Assertions
-        
+
         // 1. Verify the Capture Request was sent with the CORRECT amount (499.00) not (573.85)
         Http::assertSent(function ($request) {
-            return $request->url() == config('services.tabby.base_url', 'https://api.tabby.ai') . '/api/v2/payments/payment_id_123/captures' &&
+            return $request->url() == config('services.tabby.base_url', 'https://api.tabby.ai').'/api/v2/payments/payment_id_123/captures' &&
                    $request['amount'] === '499.00' && // MUST match Tabby's amount
                    is_string($request['reference_id']); // QA Requirement: Must be string
         });
 
         // 2. Verify local payment record was updated
         $this->payment->refresh();
-        
+
         $this->assertEquals('499.00', $this->payment->amount);
         $this->assertNotNull($this->payment->captured_at);
     }
@@ -115,7 +118,7 @@ class TabbyCaptureFixTest extends TestCase
             '*/api/v2/payments/payment_id_123/captures' => Http::response([
                 'id' => 'capture_123',
                 'amount' => '499.00',
-                'status' => 'CLOSED'
+                'status' => 'CLOSED',
             ], 200),
         ]);
 
@@ -123,9 +126,9 @@ class TabbyCaptureFixTest extends TestCase
         $response = $this->postJson('/api/webhooks/tabby', [
             'id' => 'payment_id_123',
             'status' => 'authorized', // Lowercase as per documentation/email
-            'amount' => '499.00'
+            'amount' => '499.00',
         ], [
-            'X-Tabby-Signature' => 'secret-signature'
+            'X-Tabby-Signature' => 'secret-signature',
         ]);
 
         $response->assertStatus(200);
@@ -135,7 +138,7 @@ class TabbyCaptureFixTest extends TestCase
             return str_contains($request->url(), '/captures') &&
                    $request['amount'] === '499.00';
         });
-        
+
         $this->payment->refresh();
         $this->assertEquals(PaymentStatus::paid, $this->payment->status);
         $this->assertNotNull($this->payment->captured_at);

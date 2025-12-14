@@ -45,37 +45,37 @@ class PaymentController extends Controller
 
             $payment = $gateway->callback($request);
 
-            $language = $request->language ?? (app()->getLocale() ?? "en");
+            $language = $request->language ?? (app()->getLocale() ?? 'en');
 
             // Handle different payment statuses with distinct messages
             if ($payment->status === PaymentStatus::failed) {
                 return redirect()
-                    ->route("home.index", ["language" => $language])
-                    ->with("error", __("app.payment-failed"));
+                    ->route('home.index', ['language' => $language])
+                    ->with('error', __('app.payment-failed'));
             }
 
             if ($payment->status === PaymentStatus::cancelled) {
                 return redirect()
-                    ->route("home.index", ["language" => $language])
-                    ->with("warning", __("app.payment-cancelled"));
+                    ->route('home.index', ['language' => $language])
+                    ->with('warning', __('app.payment-cancelled'));
             }
 
             // Payment successful
             return redirect()
-                ->route("home.index", ["language" => $language])
-                ->with("success", __("app.thank-you-for-your-order"))
-                ->with("payment", $payment);
+                ->route('home.index', ['language' => $language])
+                ->with('success', __('app.thank-you-for-your-order'))
+                ->with('payment', $payment);
         } catch (Exception $e) {
-            Log::emergency("Payment callback error: " . $e->getMessage(), [
-                "request" => $request->all(),
-                "exception" => $e,
+            Log::emergency('Payment callback error: '.$e->getMessage(), [
+                'request' => $request->all(),
+                'exception' => $e,
             ]);
 
-            $language = $request->language ?? (app()->getLocale() ?? "en");
+            $language = $request->language ?? (app()->getLocale() ?? 'en');
 
             return redirect()
-                ->route("home.index", ["language" => $language])
-                ->with("error", __("app.payment-error"));
+                ->route('home.index', ['language' => $language])
+                ->with('error', __('app.payment-error'));
         }
     }
 
@@ -85,12 +85,12 @@ class PaymentController extends Controller
     protected function detectGateway(Request $request): PaymentGatewayService
     {
         // HyperPay sends 'resourcePath' parameter
-        if ($request->has("resourcePath")) {
+        if ($request->has('resourcePath')) {
             return app(HyperPayPaymentGatewayService::class);
         }
 
         // Tabby sends 'payment_id' parameter
-        if ($request->has("payment_id")) {
+        if ($request->has('payment_id')) {
             return app(TabbyPaymentGatewayService::class);
         }
 
@@ -108,14 +108,14 @@ class PaymentController extends Controller
     ) {
         // Verify the payment belongs to HyperPay gateway
         if ($payment->gateway !== PaymentGateway::hyperpay) {
-            abort(404, "Payment method not supported");
+            abort(404, 'Payment method not supported');
         }
 
         // Verify the payment is still pending
         if ($payment->status !== PaymentStatus::pending) {
             return redirect()
-                ->route("home.index", ["language" => app()->getLocale()])
-                ->with("error", __("app.payment-already-processed"));
+                ->route('home.index', ['language' => app()->getLocale()])
+                ->with('error', __('app.payment-already-processed'));
         }
 
         // Get the checkout details from HyperPay service
@@ -123,20 +123,20 @@ class PaymentController extends Controller
         $checkoutDetails = $hyperPayService->getCheckoutDetails($payment);
 
         // Validate that we have the necessary checkout information
-        if (!$checkoutDetails["checkout_id"]) {
-            Log::error("HyperPay checkout details missing", [
-                "payment_id" => $payment->id,
-                "details" => $payment->details,
+        if (! $checkoutDetails['checkout_id']) {
+            Log::error('HyperPay checkout details missing', [
+                'payment_id' => $payment->id,
+                'details' => $payment->details,
             ]);
 
             return redirect()
-                ->route("checkout.index", ["language" => app()->getLocale()])
-                ->with("error", __("app.payment-form-load-error"));
+                ->route('checkout.index', ['language' => app()->getLocale()])
+                ->with('error', __('app.payment-form-load-error'));
         }
 
-        return view("payments.hyperpay-form", [
-            "payment" => $payment,
-            "checkoutDetails" => $checkoutDetails,
+        return view('payments.hyperpay-form', [
+            'payment' => $payment,
+            'checkoutDetails' => $checkoutDetails,
         ]);
     }
 }

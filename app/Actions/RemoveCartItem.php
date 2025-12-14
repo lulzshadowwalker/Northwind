@@ -8,7 +8,7 @@ class RemoveCartItem
 {
     public static function make(): self
     {
-        return new self();
+        return new self;
     }
 
     public function execute(CartItem $item)

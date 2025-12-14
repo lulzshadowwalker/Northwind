@@ -22,8 +22,8 @@ class StoreProductQuestionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "email" => "required|email|max:255",
-            "question" => "required|string",
+            'email' => 'required|email|max:255',
+            'question' => 'required|string',
         ];
     }
 }

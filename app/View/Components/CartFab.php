@@ -2,8 +2,8 @@
 
 namespace App\View\Components;
 
-use App\Factories\CartFactory;
 use App\Actions\CalculateCartTotal;
+use App\Factories\CartFactory;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -25,6 +25,7 @@ class CartFab extends Component
     {
         $cart = CartFactory::make();
         $cartTotal = app(CalculateCartTotal::class)->execute($cart);
+
         return view('components.cart-fab', compact('cart', 'cartTotal'));
     }
 }

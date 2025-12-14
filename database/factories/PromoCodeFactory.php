@@ -2,9 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\PromoCode;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PromoCodeFactory extends Factory
 {
@@ -21,17 +20,17 @@ class PromoCodeFactory extends Factory
     public function definition(): array
     {
         return [
-            "code" => fake()->unique()->word(),
-            "type" => fake()->randomElement(["percentage", "fixed"]),
-            "value" => fake()->randomFloat(0, 0, 9999),
-            "minimum_amount" => fake()->randomFloat(0, 0, 9999),
-            "maximum_discount" => fake()->randomFloat(0, 0, 999),
-            "usage_limit_per_customer" => fake()->numberBetween(-100, 100),
-            "usage_limit" => fake()->numberBetween(-10000, 10000),
-            "usage_count" => fake()->numberBetween(-10000, 10000),
-            "starts_at" => fake()->dateTime(),
-            "ends_at" => fake()->dateTime(),
-            "is_active" => fake()->boolean(),
+            'code' => fake()->unique()->word(),
+            'type' => fake()->randomElement(['percentage', 'fixed']),
+            'value' => fake()->randomFloat(0, 0, 9999),
+            'minimum_amount' => fake()->randomFloat(0, 0, 9999),
+            'maximum_discount' => fake()->randomFloat(0, 0, 999),
+            'usage_limit_per_customer' => fake()->numberBetween(-100, 100),
+            'usage_limit' => fake()->numberBetween(-10000, 10000),
+            'usage_count' => fake()->numberBetween(-10000, 10000),
+            'starts_at' => fake()->dateTime(),
+            'ends_at' => fake()->dateTime(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

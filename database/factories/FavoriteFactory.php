@@ -2,11 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Customer;
 use App\Models\Favorite;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FavoriteFactory extends Factory
 {

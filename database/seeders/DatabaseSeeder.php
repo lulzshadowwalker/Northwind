@@ -30,10 +30,10 @@ class DatabaseSeeder extends Seeder
     {
         // Create an admin user
         User::factory()->create([
-            "name" => "Admin User",
-            "email" => "admin@example.com",
-            "password" => "password",
-            "is_admin" => true,
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => 'password',
+            'is_admin' => true,
         ]);
 
         // Create customers
@@ -52,31 +52,31 @@ class DatabaseSeeder extends Seeder
             $product
                 ->collections()
                 ->attach(
-                    $collections->random(rand(1, 2))->pluck("id")->toArray(),
+                    $collections->random(rand(1, 2))->pluck('id')->toArray(),
                 );
         }
 
         // Create reviews for products by random customers
         foreach ($products as $product) {
             Review::factory(rand(2, 5))->create([
-                "product_id" => $product->id,
-                "customer_id" => $customers->random()->id,
+                'product_id' => $product->id,
+                'customer_id' => $customers->random()->id,
             ]);
         }
 
         // Create favorites for customers
         foreach ($customers as $customer) {
             Favorite::factory(rand(2, 4))->create([
-                "customer_id" => $customer->id,
-                "product_id" => $products->random()->id,
+                'customer_id' => $customer->id,
+                'product_id' => $products->random()->id,
             ]);
         }
 
         // Create product questions
         foreach ($products as $product) {
             ProductQuestion::factory(rand(1, 3))->create([
-                "product_id" => $product->id,
-                "customer_id" => $customers->random()->id,
+                'product_id' => $product->id,
+                'customer_id' => $customers->random()->id,
             ]);
         }
 
@@ -89,32 +89,32 @@ class DatabaseSeeder extends Seeder
         // Create carts for some customers and add items
         foreach ($customers->take(5) as $customer) {
             $cart = Cart::factory()->create([
-                "customer_id" => $customer->id,
+                'customer_id' => $customer->id,
             ]);
             CartItem::factory(rand(1, 3))->create([
-                "cart_id" => $cart->id,
-                "product_id" => Product::inRandomOrder()->first()->id,
+                'cart_id' => $cart->id,
+                'product_id' => Product::inRandomOrder()->first()->id,
             ]);
         }
 
         // Create a guest cart
         $guestCart = Cart::factory()->create([
-            "customer_id" => null,
-            "session_id" => Str::uuid(),
+            'customer_id' => null,
+            'session_id' => Str::uuid(),
         ]);
         CartItem::factory(rand(1, 2))->create([
-            "cart_id" => $guestCart->id,
-            "product_id" => Product::inRandomOrder()->first()->id,
+            'cart_id' => $guestCart->id,
+            'product_id' => Product::inRandomOrder()->first()->id,
         ]);
 
         // Create orders for some customers with order items
         foreach ($customers->take(6) as $customer) {
             $order = Order::factory()->create([
-                "customer_id" => $customer->id,
+                'customer_id' => $customer->id,
             ]);
             $orderItems = OrderItem::factory(rand(1, 3))->create([
-                "order_id" => $order->id,
-                "product_id" => Product::inRandomOrder()->first()->id,
+                'order_id' => $order->id,
+                'product_id' => Product::inRandomOrder()->first()->id,
             ]);
         }
 

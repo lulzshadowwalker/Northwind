@@ -45,7 +45,7 @@ class CalculateCartTotalTest extends TestCase
         // Tax = 400 * 0.15 = 60
         // Total = 460
 
-        $action = new CalculateCartTotal();
+        $action = new CalculateCartTotal;
 
         // Act
         $cartTotal = $action->execute($cart);
@@ -65,7 +65,7 @@ class CalculateCartTotalTest extends TestCase
             'amount' => 100,
             'sale_amount' => 80, // Sale price 80 SAR
             'sale_end_date' => now()->addDay(), // Sale is active
-        ]); 
+        ]);
         $product2 = Product::factory()->create(['amount' => 200, 'sale_amount' => null]); // 200 SAR
 
         CartItem::factory()->create([
@@ -84,7 +84,7 @@ class CalculateCartTotalTest extends TestCase
         // Tax = 360 * 0.15 = 54
         // Total = 360 + 54 = 414
 
-        $action = new CalculateCartTotal();
+        $action = new CalculateCartTotal;
 
         // Act
         $cartTotal = $action->execute($cart);
@@ -95,14 +95,14 @@ class CalculateCartTotalTest extends TestCase
         $this->assertEquals(54.00, $cartTotal->tax->getAmount()->toFloat());
         $this->assertEquals(414.00, $cartTotal->total->getAmount()->toFloat());
     }
-    
+
     public function test_it_handles_empty_cart()
     {
         $cart = Cart::factory()->create();
-        $action = new CalculateCartTotal();
-        
+        $action = new CalculateCartTotal;
+
         $cartTotal = $action->execute($cart);
-        
+
         $this->assertEquals(0.00, $cartTotal->subtotal->getAmount()->toFloat());
         $this->assertEquals(0.00, $cartTotal->total->getAmount()->toFloat());
     }

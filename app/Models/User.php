@@ -21,7 +21,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     /** @use HasFactory<UserFactory> */
     use HasFactory, InteractsWithMedia, Notifiable;
 
-    const MEDIA_COLLECTION_AVATAR = "avatar";
+    const MEDIA_COLLECTION_AVATAR = 'avatar';
 
     /**
      * The attributes that are mass assignable.
@@ -29,12 +29,12 @@ class User extends Authenticatable implements FilamentUser, HasMedia
      * @var list<string>
      */
     protected $fillable = [
-        "name",
-        "email",
-        "password",
-        "is_admin",
-        "phone",
-        "date_of_birth",
+        'name',
+        'email',
+        'password',
+        'is_admin',
+        'phone',
+        'date_of_birth',
     ];
 
     /**
@@ -42,7 +42,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
      *
      * @var list<string>
      */
-    protected $hidden = ["password", "remember_token"];
+    protected $hidden = ['password', 'remember_token'];
 
     /**
      * Get the attributes that should be cast.
@@ -52,9 +52,9 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     protected function casts(): array
     {
         return [
-            "email_verified_at" => "datetime",
-            "password" => "hashed",
-            "date_of_birth" => "date",
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'date_of_birth' => 'date',
         ];
     }
 
@@ -65,7 +65,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
 
     public function registerMediaCollections(): void
     {
-        $name = Str::replace(" ", "+", $this->name);
+        $name = Str::replace(' ', '+', $this->name);
 
         $this->addMediaCollection(self::MEDIA_COLLECTION_AVATAR)
             ->singleFile()
@@ -75,7 +75,7 @@ class User extends Authenticatable implements FilamentUser, HasMedia
     public function avatar(): Attribute
     {
         return Attribute::get(
-            fn() => $this->getFirstMediaUrl(self::MEDIA_COLLECTION_AVATAR) ?:
+            fn () => $this->getFirstMediaUrl(self::MEDIA_COLLECTION_AVATAR) ?:
             null,
         );
     }

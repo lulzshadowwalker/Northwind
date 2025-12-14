@@ -7,18 +7,18 @@ namespace App\Enums;
 
 enum PaymentStatus: string
 {
-    case pending = "pending";
-    case paid = "paid";
-    case failed = "failed";
-    case cancelled = "cancelled";
+    case pending = 'pending';
+    case paid = 'paid';
+    case failed = 'failed';
+    case cancelled = 'cancelled';
 
     public function label(): string
     {
         return match ($this) {
-            self::pending => "Pending",
-            self::paid => "Paid",
-            self::failed => "Failed",
-            self::cancelled => "Cancelled",
+            self::pending => 'Pending',
+            self::paid => 'Paid',
+            self::failed => 'Failed',
+            self::cancelled => 'Cancelled',
         };
     }
 
@@ -33,6 +33,6 @@ enum PaymentStatus: string
 
     public static function values(): array
     {
-        return array_map(fn($e) => $e->value, self::cases());
+        return array_map(fn ($e) => $e->value, self::cases());
     }
 }

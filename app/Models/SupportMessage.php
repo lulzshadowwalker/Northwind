@@ -11,7 +11,7 @@ class SupportMessage extends Model
     /** @use HasFactory<\Database\Factories\SupportMessageFactory> */
     use HasFactory;
 
-    protected $fillable = ["name", "email", "message", "customer_id"];
+    protected $fillable = ['name', 'email', 'message', 'customer_id'];
 
     public function customer(): BelongsTo
     {

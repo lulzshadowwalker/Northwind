@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use Illuminate\Support\Str;
 use App\Models\Collection;
 
 class CollectionFactory extends BaseFactory
@@ -20,12 +19,12 @@ class CollectionFactory extends BaseFactory
     public function definition(): array
     {
         return [
-            "name" => $this->localized(fn(): string => fake()->word()),
-            "slug" => fake()->unique()->slug(),
-            "description" => $this->localized(
-                fn(): string => fake()->sentence()
+            'name' => $this->localized(fn (): string => fake()->word()),
+            'slug' => fake()->unique()->slug(),
+            'description' => $this->localized(
+                fn (): string => fake()->sentence()
             ),
-            "is_active" => fake()->boolean(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

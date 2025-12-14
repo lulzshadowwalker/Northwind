@@ -18,10 +18,10 @@ class SupportMessageFactory extends Factory
     public function definition(): array
     {
         return [
-            "name" => $this->faker->name(),
-            "email" => $this->faker->email(),
-            "message" => $this->faker->paragraph(),
-            "customer_id" => $this->faker->boolean()
+            'name' => $this->faker->name(),
+            'email' => $this->faker->email(),
+            'message' => $this->faker->paragraph(),
+            'customer_id' => $this->faker->boolean()
                 ? Customer::factory()
                 : null,
         ];

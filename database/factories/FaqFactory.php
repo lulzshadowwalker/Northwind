@@ -12,8 +12,8 @@ class FaqFactory extends BaseFactory
     public function definition(): array
     {
         return [
-            "question" => $this->localized(fn(): string => fake()->sentence()),
-            "answer" => $this->localized(fn(): string => fake()->paragraph()),
+            'question' => $this->localized(fn (): string => fake()->sentence()),
+            'answer' => $this->localized(fn (): string => fake()->paragraph()),
         ];
     }
 }

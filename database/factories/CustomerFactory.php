@@ -2,10 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use App\Models\Customer;
 
 class CustomerFactory extends Factory
 {
@@ -22,7 +21,7 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            "user_id" => User::factory(),
+            'user_id' => User::factory(),
         ];
     }
 }

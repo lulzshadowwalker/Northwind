@@ -23,23 +23,23 @@ class Order extends Model implements Payable
      * @var array
      */
     protected $fillable = [
-        "order_number",
-        "status",
-        "subtotal",
-        "discount_amount",
-        "total",
-        "promo_code",
-        "customer_id",
-        "shipping_address",
-        "shipping_city",
-        "shipping_state",
-        "shipping_zip",
-        "shipping_country",
-        "billing_address",
-        "billing_city",
-        "billing_state",
-        "billing_zip",
-        "billing_country",
+        'order_number',
+        'status',
+        'subtotal',
+        'discount_amount',
+        'total',
+        'promo_code',
+        'customer_id',
+        'shipping_address',
+        'shipping_city',
+        'shipping_state',
+        'shipping_zip',
+        'shipping_country',
+        'billing_address',
+        'billing_city',
+        'billing_state',
+        'billing_zip',
+        'billing_country',
     ];
 
     /**
@@ -50,13 +50,13 @@ class Order extends Model implements Payable
     protected function casts(): array
     {
         return [
-            "id" => "integer",
-            "status" => OrderStatus::class,
-            "subtotal" => "decimal:2",
-            "discount_amount" => "decimal:2",
-            "total" => "decimal:2",
-            "price" => MoneyCast::class . ":total",
-            "customer_id" => "integer",
+            'id' => 'integer',
+            'status' => OrderStatus::class,
+            'subtotal' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'total' => 'decimal:2',
+            'price' => MoneyCast::class.':total',
+            'customer_id' => 'integer',
         ];
     }
 
@@ -72,7 +72,7 @@ class Order extends Model implements Payable
 
     public function payments(): MorphMany
     {
-        return $this->morphMany(Payment::class, "payable");
+        return $this->morphMany(Payment::class, 'payable');
     }
 
     public function items(): array
@@ -82,7 +82,7 @@ class Order extends Model implements Payable
                 // Manually create Money object since cast might not be working
                 $price = \Brick\Money\Money::of(
                     $item->unit_price,
-                    "SAR",
+                    'SAR',
                     roundingMode: \Brick\Math\RoundingMode::HALF_UP,
                 );
 
@@ -98,8 +98,8 @@ class Order extends Model implements Payable
     public function price(): Money
     {
         // Ensure orderItems are loaded
-        if (!$this->relationLoaded("orderItems")) {
-            $this->load("orderItems");
+        if (! $this->relationLoaded('orderItems')) {
+            $this->load('orderItems');
         }
 
         // Calculate subtotal from order items using proper decimal arithmetic
@@ -107,6 +107,7 @@ class Order extends Model implements Payable
             $itemTotal = \Brick\Math\BigDecimal::of(
                 $item->unit_price,
             )->multipliedBy(\Brick\Math\BigDecimal::of($item->quantity));
+
             return $carry->plus($itemTotal);
         }, \Brick\Math\BigDecimal::zero());
 
@@ -116,13 +117,13 @@ class Order extends Model implements Payable
         }
 
         // Add 15% VAT using proper decimal arithmetic
-        $vatRate = \Brick\Math\BigDecimal::of("0.15");
+        $vatRate = \Brick\Math\BigDecimal::of('0.15');
         $vatAmount = $subtotal->multipliedBy($vatRate);
         $totalWithTax = $subtotal->plus($vatAmount);
 
         return Money::of(
             $totalWithTax->toFloat(),
-            "SAR",
+            'SAR',
             roundingMode: \Brick\Math\RoundingMode::HALF_UP,
         );
     }

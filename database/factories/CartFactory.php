@@ -2,10 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Cart;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use App\Models\Cart;
 
 class CartFactory extends Factory
 {
@@ -24,8 +23,8 @@ class CartFactory extends Factory
         $hasCustomer = $this->faker->boolean();
 
         return [
-            "session_id" => !$hasCustomer ? fake()->word() : null,
-            "customer_id" => $hasCustomer ? Customer::factory() : null,
+            'session_id' => ! $hasCustomer ? fake()->word() : null,
+            'customer_id' => $hasCustomer ? Customer::factory() : null,
         ];
     }
 }
