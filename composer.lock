@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dfc6678405b623e8a08c835c39ca230d",
+    "content-hash": "45c8f992f7a2eb6098f02d99ad93e81e",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -7190,6 +7190,74 @@
             "time": "2025-02-25T09:09:36+00:00"
         },
         {
+            "name": "shaffe/laravel-mail-log-channel",
+            "version": "v2.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shaffe-fr/laravel-mail-log-channel.git",
+                "reference": "d7ee166dc72c0cbc18852784e043ff66256eb718"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shaffe-fr/laravel-mail-log-channel/zipball/d7ee166dc72c0cbc18852784e043ff66256eb718",
+                "reference": "d7ee166dc72c0cbc18852784e043ff66256eb718",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/bus": "^5.6|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/contracts": "^5.6|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/log": "^5.6|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/mail": "^5.6|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/queue": "^5.6|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/support": "^5.6|^6.0|^7.|^8.00|^9.0|^10.|^11.0|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Shaffe\\MailLogChannel\\MailLogChannelServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Shaffe\\MailLogChannel\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Karel FAILLE",
+                    "email": "shaffe.fr@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Steve Porter",
+                    "email": "steve@designmynight.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A package to support logging via email in Laravel",
+            "homepage": "https://github.com/shaffe-fr/laravel-mail-log-channel",
+            "keywords": [
+                "laravel",
+                "laravel-log-mailer",
+                "laravel-mail-log-channel",
+                "logging",
+                "mail channel",
+                "monolog",
+                "shaffe"
+            ],
+            "support": {
+                "issues": "https://github.com/shaffe-fr/laravel-mail-log-channel/issues",
+                "source": "https://github.com/shaffe-fr/laravel-mail-log-channel/tree/v2.5.0"
+            },
+            "time": "2025-02-25T10:24:03+00:00"
+        },
+        {
             "name": "socialiteproviders/google",
             "version": "4.1.0",
             "source": {
@@ -13734,5 +13802,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

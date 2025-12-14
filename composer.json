@@ -27,6 +27,7 @@
         "outerweb/filament-translatable-fields": "^2.1",
         "predis/predis": "^3.2",
         "propaganistas/laravel-phone": "^6.0",
+        "shaffe/laravel-mail-log-channel": "^2.5",
         "socialiteproviders/google": "^4.1",
         "socialiteproviders/zoho": "^4.1",
         "spatie/browsershot": "^5.0",

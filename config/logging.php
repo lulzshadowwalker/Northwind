@@ -127,6 +127,32 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'mail' => [
+            'driver' => 'mail',
+            'level' => env('LOG_MAIL_LEVEL', 'notice'),
+
+            'to' => [
+                [
+                    'address' => env('LOG_MAIL_ADDRESS', 'lulzshadowwalker@gmail.com'),
+                    'name' => 'Error',
+                ],
+            ],
+
+            'from' => [
+                // Defaults to config('mail.from.address')
+                'address' => env('LOG_MAIL_ADDRESS'),
+                // Defaults to config('mail.from.name')
+                'name' => 'Errors',
+            ],
+
+            // Optionally overwrite the subject format pattern
+            // 'subject_format' => env('LOG_MAIL_SUBJECT_FORMAT', '[%datetime%] %level_name%: %message%'),
+
+            // Optionally overwrite the mailable template
+            // Two variables are sent to the view: `string $content` and `array $records`
+            // 'mailable' => NewLogMailable::class
+        ],
+
     ],
 
 ];
