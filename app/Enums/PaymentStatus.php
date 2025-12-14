@@ -2,8 +2,8 @@
 
 namespace App\Enums;
 
-//  TODO: Add colors
-// use Filament\Support\Colors\Color;
+use Closure;
+use Filament\Support\Colors\Color;
 
 enum PaymentStatus: string
 {
@@ -22,14 +22,15 @@ enum PaymentStatus: string
         };
     }
 
-    // public function color(): string|array|bool|Closure|null
-    // {
-    //     return match ($this) {
-    //         self::pending => Color::hex('#FFA500'),
-    //         self::paid => Color::hex('#28A745'),
-    //         self::failed => Color::hex('#DC3545'),
-    //     };
-    // }
+    public function color(): string|array|bool|Closure|null
+    {
+        return match ($this) {
+            self::pending => Color::hex('#FFA500'),
+            self::paid => Color::hex('#28A745'),
+            self::failed => Color::hex('#DC3545'),
+            self::cancelled => Color::hex('#6C757D'),
+        };
+    }
 
     public static function values(): array
     {

@@ -3,12 +3,13 @@
 namespace App\Enums;
 
 use Closure;
-
-//  TODO: Add colors
-// use Filament\Support\Colors\Color;
+use Filament\Support\Colors\Color;
 
 enum PaymentGateway: string
 {
+    /**
+     * @deprecated
+     */
     case myfatoorah = 'myfatoorah'; // Deprecated - will be removed
     case tabby = 'tabby';
     case hyperpay = 'hyperpay';
@@ -31,12 +32,14 @@ enum PaymentGateway: string
         };
     }
 
-    // public function color(): string|array|bool|Closure|null
-    // {
-    //     return match ($this) {
-    //         self::myfatoorah => Color::hex('#FFA500'),
-    //     };
-    // }
+    public function color(): string|array|bool|Closure|null
+    {
+        return match ($this) {
+            self::myfatoorah => Color::hex('#FFA500'),
+            self::tabby => Color::hex('#32CD32'),
+            self::hyperpay => Color::hex('#1E90FF'),
+        };
+    }
 
     public static function values(): array
     {
