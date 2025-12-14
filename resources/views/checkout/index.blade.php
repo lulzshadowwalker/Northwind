@@ -48,7 +48,7 @@
                                         <!-- Price -->
                                         <div class="text-right">
                                     <span class="font-semibold text-gray-900">
-                                        ${{ number_format($item->product->price->getAmount()->toFloat() * $item->quantity, 0) }}
+                                        <x-sar /> {{ number_format(($item->product->sale_price ?? $item->product->price)->getAmount()->toFloat() * $item->quantity, 0) }}
                                     </span>
                                         </div>
                                     </div>
@@ -63,21 +63,23 @@
                                 <div class="flex justify-between items-center py-3">
                                     <span class="text-gray-600">Subtotal</span>
                                     <span class="font-semibold text-gray-900 flex items-center">
-                                        {{ number_format($cart->total->getAmount()->toFloat(), 2) }} <x-sar />
+                                        {{ number_format($cartTotal->subtotal->getAmount()->toFloat(), 2) }} <x-sar />
                                     </span>
                                 </div>
 
                                 <!-- Shipping -->
                                 <div class="flex justify-between items-center py-3">
                                     <span class="text-gray-600">Shipping</span>
-                                    <span class="font-semibold text-gray-900 flex items-center">0.00 <x-sar /></span>
+                                    <span class="font-semibold text-gray-900 flex items-center">
+                                        {{ number_format($cartTotal->shipping->getAmount()->toFloat(), 2) }} <x-sar />
+                                    </span>
                                 </div>
 
                                 <!-- Tax (15% VAT) -->
                                 <div class="flex justify-between items-center py-3 border-b border-gray-100">
                                     <span class="text-gray-600">Tax (15%)</span>
                                     <span class="font-semibold text-gray-900 flex items-center">
-                                        {{ number_format($cart->total->getAmount()->toFloat() * 0.15, 2) }} <x-sar />
+                                        {{ number_format($cartTotal->tax->getAmount()->toFloat(), 2) }} <x-sar />
                                     </span>
                                 </div>
 
@@ -103,7 +105,7 @@
                                     <div class="flex justify-between items-center">
                                         <span class="text-xl font-bold text-gray-900">Total</span>
                                         <span class="text-2xl font-bold text-gray-900 flex items-center">
-                                            {{ number_format($cart->total->getAmount()->toFloat() * 1.15, 2) }} <x-sar />
+                                            {{ number_format($cartTotal->total->getAmount()->toFloat(), 2) }} <x-sar />
                                         </span>
                                     </div>
                                 </div>
@@ -252,7 +254,7 @@
                             eligibilityStatus.classList.remove('hidden');
 
                             // Calculate total from cart including tax (15% VAT)
-                            const total = {{ $cart->total->getAmount()->toFloat() * 1.15 }};
+                            const total = {{ $cartTotal->total->getAmount()->toFloat() }};
 
                             fetch('{{ route("checkout.tabby-eligibility", ["language" => app()->getLocale()]) }}', {
                                 method: 'POST',
@@ -262,7 +264,7 @@
                                 },
                                 body: JSON.stringify({
                                     amount: total,
-                                    currency: '{{ $cart->total->getCurrency()->getCurrencyCode() }}',
+                                    currency: '{{ $cartTotal->total->getCurrency()->getCurrencyCode() }}',
                                     buyer: {
                                         email: @json(auth()->user()->email),
                                         phone: @json(auth()->user()->phone),

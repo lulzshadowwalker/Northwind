@@ -3,6 +3,7 @@
 namespace App\View\Components;
 
 use App\Factories\CartFactory;
+use App\Actions\CalculateCartTotal;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -23,6 +24,7 @@ class CartFab extends Component
     public function render(): View|Closure|string
     {
         $cart = CartFactory::make();
-        return view('components.cart-fab', compact('cart'));
+        $cartTotal = app(CalculateCartTotal::class)->execute($cart);
+        return view('components.cart-fab', compact('cart', 'cartTotal'));
     }
 }

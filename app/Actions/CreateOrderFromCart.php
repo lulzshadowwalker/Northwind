@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Actions\CalculateCartTotal;
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\DB;
 
@@ -27,9 +28,17 @@ class CreateOrderFromCart
         }
 
         return DB::transaction(function () use ($cart, $promoCode, $clearCart) {
-            $subtotal = $cart->total;
+            $cartTotal = app(CalculateCartTotal::class)->execute($cart);
+            
+            $subtotal = $cartTotal->subtotal;
             $discountAmount = BigDecimal::zero(); // TODO: Calculate discount based on promo code
-            $total = $subtotal->minus($discountAmount);
+            
+            // Note: If discount is applied, tax should be recalculated. 
+            // But CalculateCartTotal doesn't support discount yet.
+            // For now, we just subtract discount from total (which includes tax).
+            // Ideally, we should pass discount to CalculateCartTotal.
+            
+            $total = $cartTotal->total->minus($discountAmount);
 
             $order = Order::create([
                 "order_number" => $this->generateOrderNumber(),
@@ -43,7 +52,8 @@ class CreateOrderFromCart
 
             foreach ($cart->cartItems as $cartItem) {
                 $product = $cartItem->product;
-                $unitPrice = $product->price->getAmount();
+                $price = $product->sale_price ?? $product->price;
+                $unitPrice = $price->getAmount();
                 $itemSubtotal = $unitPrice->multipliedBy($cartItem->quantity);
                 $itemTotal = $itemSubtotal; // No item-level discounts for now
 

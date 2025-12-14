@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\CreateOrderFromCart;
+use App\Actions\CalculateCartTotal;
 use App\Contracts\PaymentGatewayService;
 use App\Services\HyperPayPaymentGatewayService;
 use App\Services\TabbyPaymentGatewayService;
@@ -19,7 +20,7 @@ class CheckoutController extends Controller
         //
     }
 
-    public function index(string $language, Request $request)
+    public function index(string $language, Request $request, CalculateCartTotal $calculateCartTotal)
     {
         if (!$request->user() || !$request->user()->customer) {
             return redirect()
@@ -36,12 +37,14 @@ class CheckoutController extends Controller
                 ->with("warning", __("app.please-add-items-before-checkout"));
         }
 
+        $cartTotal = $calculateCartTotal->execute($cart);
+
         // Get payment methods from both gateways
         $hyperPayService = app(HyperPayPaymentGatewayService::class);
         $tabbyService = app(TabbyPaymentGatewayService::class);
 
-        $hyperPayMethods = $hyperPayService->paymentMethods($cart->total);
-        $tabbyMethods = $tabbyService->paymentMethods($cart->total);
+        $hyperPayMethods = $hyperPayService->paymentMethods($cartTotal->total);
+        $tabbyMethods = $tabbyService->paymentMethods($cartTotal->total);
 
         $paymentMethods = array_merge($hyperPayMethods, $tabbyMethods);
 
@@ -57,7 +60,7 @@ class CheckoutController extends Controller
                 ->with("warning", __("app.no-payment-methods-warning"));
         }
 
-        return view("checkout.index", compact("cart", "paymentMethods"));
+        return view("checkout.index", compact("cart", "paymentMethods", "cartTotal"));
     }
 
     /**

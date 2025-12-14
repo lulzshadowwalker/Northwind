@@ -6,10 +6,10 @@
             aria-label="Open cart">
             {{-- <!-- Cart count indicator -->
             @if (($cart?->cartItems->count() ?? 0) > 0)
-                <div
-                    class="badge badge-secondary absolute -top-2 -left-4 text-2xs font-bold rotate-270 w-6 h-6 flex items-center justify-center">
-                    {{ $cart?->cartItems->count() ?? 0 }}
-                </div>
+            <div
+                class="badge badge-secondary absolute -top-2 -left-4 text-2xs font-bold rotate-270 w-6 h-6 flex items-center justify-center">
+                {{ $cart?->cartItems->count() ?? 0 }}
+            </div>
             @endif --}}
 
             <!-- Shopping bag icon -->
@@ -46,7 +46,8 @@
         <!-- Header -->
         <header class="flex items-center justify-between p-6 border-b border-base-300">
             <h2 id="slide-over-title" class="text-2xl font-light tracking-wide text-base-content">
-                {{ __('app.your-bag') }}</h2>
+                {{ __('app.your-bag') }}
+            </h2>
             <button @click="cartOpen = false" class="btn btn-ghost btn-circle" aria-label="Close cart">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
@@ -77,8 +78,8 @@
 
                 <!-- Action Buttons -->
                 <div class="space-y-3 w-full">
-                    <a href="{{ route('products.index', ['language' => app()->getLocale()]) }}"
-                        @click="cartOpen = false" class="btn btn-primary w-full">
+                    <a href="{{ route('products.index', ['language' => app()->getLocale()]) }}" @click="cartOpen = false"
+                        class="btn btn-primary w-full">
                         <i class="fa fa-sparkles mr-2"></i>
                         {{ __('app.start-shopping') }}
                     </a>
@@ -108,7 +109,8 @@
                             <h3 class="text-lg font-semibold text-base-content text-pretty">{{ $item->product->name }}
                             </h3>
                             <p class="text-sm font-light text-neutral-500 line-clamp-2">
-                                {{ $item->product->description }}</p>
+                                {{ $item->product->description }}
+                            </p>
                             <p class="text-lg font-bold text-base-content mt-2 flex items-center">
                                 {{ $item->product->price->getAmount() }}
                                 <x-sar />
@@ -132,8 +134,7 @@
                                     action="{{ route('cart.items.decrement', ['cartItem' => $item->id, 'language' => app()->getLocale()]) }}"
                                     method="post">
                                     @csrf
-                                    <button type="submit"
-                                        class="btn btn-ghost btn-xs tooltip tooltip-left rtl:tooltip-right"
+                                    <button type="submit" class="btn btn-ghost btn-xs tooltip tooltip-left rtl:tooltip-right"
                                         data-tip="{{ __('app.decrease-quantity') }}"
                                         aria-label="{{ __('app.decrease-quantity') }}">
                                         <i class="fa fa-minus"></i>
@@ -146,8 +147,7 @@
                                     action="{{ route('cart.items.increment', ['cartItem' => $item->id, 'language' => app()->getLocale()]) }}"
                                     method="post">
                                     @csrf
-                                    <button type="submit"
-                                        class="btn btn-ghost btn-xs tooltip tooltip-left rtl:tooltip-right"
+                                    <button type="submit" class="btn btn-ghost btn-xs tooltip tooltip-left rtl:tooltip-right"
                                         data-tip="{{ __('app.increase-quantity') }}"
                                         aria-label="{{ __('app.increase-quantity') }}">
                                         <i class="fa fa-plus"></i>
@@ -164,15 +164,14 @@
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-lg font-light text-base-content">{{ __('app.subtotal') }}</span>
                     <span
-                        class="text-xl font-bold text-base-content inline-flex items-center">{{ $cart->total->getAmount() }}
+                        class="text-xl font-bold text-base-content inline-flex items-center">{{ $cartTotal->subtotal->getAmount() }}
                         <x-sar /></span>
                 </div>
 
                 <!-- Tabby Promo Widget -->
                 <div id="TabbyPromoCart" class="mb-4"></div>
 
-                <a href="{{ route('checkout.index', ['language' => app()->getLocale()]) }}"
-                    class="btn btn-primary w-full">
+                <a href="{{ route('checkout.index', ['language' => app()->getLocale()]) }}" class="btn btn-primary w-full">
                     {{ __('app.proceed-to-checkout') }}
                 </a>
                 <div class="text-center mt-4">
@@ -190,21 +189,21 @@
         <!-- Tabby Promo Script for Cart -->
         <script src="https://checkout.tabby.ai/tabby-promo.js"></script>
         <script>
-        function initTabby() {
-            new TabbyPromo({
+            function initTabby() {
+                new TabbyPromo({
                     selector: '#TabbyPromoCart',
                     currency: 'SAR',
-                    price: '{{ number_format($cart->total->getAmount()->toFloat(), 2, '.', '') }}',
+                    price: '{{ number_format($cartTotal->total->getAmount()->toFloat(), 2, '.', '') }}',
                     lang: '{{ app()->getLocale() }}',
                     source: 'cart',
                     publicKey: '{{ config("services.tabby.public_key") }}',
                     merchantCode: '{{ config("services.tabby.merchant_code", "NWSA") }}'
                 });
-        }
+            }
 
-        initTabby();
+            initTabby();
 
-        document.addEventListener('ajax:success', initTabby)
+            document.addEventListener('ajax:success', initTabby)
         </script>
     @endpush
 @endif

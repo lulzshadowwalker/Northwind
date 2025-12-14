@@ -52,15 +52,8 @@ class HyperPayPaymentGatewayService implements PaymentGatewayService
         $user = Auth::user();
 
         // Calculate total amount
-        $amount = collect($payable->items())->reduce(
-            fn(BigDecimal $carry, $item) => $carry->plus(
-                $item
-                    ->price()
-                    ->getAmount()
-                    ->multipliedBy(BigDecimal::of($item->quantity())),
-            ),
-            BigDecimal::zero(),
-        );
+        // Use the payable's price() method which should return the total amount including tax
+        $amount = $payable->price()->getAmount();
 
         $currencyCode = $payable->price()->getCurrency()->getCurrencyCode();
 
