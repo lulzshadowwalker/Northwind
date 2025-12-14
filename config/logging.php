@@ -129,7 +129,7 @@ return [
 
         'mail' => [
             'driver' => 'mail',
-            'level' => env('LOG_MAIL_LEVEL', 'notice'),
+            'level' => env('LOG_MAIL_LEVEL', 'critical'),
 
             'to' => [
                 [
