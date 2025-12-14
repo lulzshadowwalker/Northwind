@@ -49,7 +49,6 @@ class CheckoutController extends Controller
         $paymentMethods = array_merge($hyperPayMethods, $tabbyMethods);
 
         if (! count($paymentMethods)) {
-            // TODO: Send out an emergency email to admins and developers
             Log::emergency('No payment methods available for checkout', [
                 'cart_id' => $cart->id,
                 'customer_id' => $request->user()->id,
