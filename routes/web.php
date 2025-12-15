@@ -48,6 +48,11 @@ Route::prefix('{language}')
             'store',
         ])->name('products.questions.store');
 
+        Route::post('/products/questions/{productQuestion}/subscribe', [
+            \App\Http\Controllers\ProductQuestionSubscriptionController::class,
+            'store',
+        ])->name('products.questions.subscribe');
+
         Route::get('/collections/{collection}', function ($collection) {
             throw new Exception('Collection page not implemented yet');
         })->name('collections.show');

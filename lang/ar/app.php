@@ -249,4 +249,9 @@ return [
     'back-to-checkout' => '← العودة إلى الدفع',
     'payment-already-processed' => 'تمت معالجة هذا الدفع بالفعل أو أنه لم يعد صالحًا.',
     'payment-form-load-error' => 'تعذر تحميل نموذج الدفع. يرجى المحاولة مرة أخرى.',
+
+    // Product Question Subscription
+    'must-be-logged-in-to-subscribe' => 'يجب أن تكون مسجلاً للدخول للاشتراك في إجابات الأسئلة.',
+    'you-will-be-notified' => 'سيتم إعلامك عندما يتم الرد على هذا السؤال.',
+    'no-questions-yet' => 'لم يتم طرح أي أسئلة حول هذا المنتج بعد.',
 ];

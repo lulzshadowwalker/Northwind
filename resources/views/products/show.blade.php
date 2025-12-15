@@ -1,39 +1,38 @@
 <x-layout title="{{ $product->name }} - Mystic Bloom">
     <div class="bg-base-100 text-base-content" x-data="productGallery()">
         <!-- Sale Countdown Banner -->
-        @if($product->sale_price && $product->sale_end_date && $product->sale_end_date->isFuture())
-        <div class="bg-gradient-to-r from-primary to-secondary text-white py-4"
-             x-data="countdown('{{ $product->sale_end_date->toIso8601String() }}')">
-            <div class="container mx-auto px-4 text-center">
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-fire text-orange-300"></i>
-                        <span class="font-medium">{{ __('app.limited-time-offer') }}</span>
-                    </div>
-                    <div class="flex gap-2 items-center">
-                        <span class="text-sm opacity-90">{{ __('app.ends-in') }}</span>
-                        <div class="flex gap-1">
-                            <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span :style="`--value:${days};`" x-text="days"></span>
+        @if ($product->sale_price && $product->sale_end_date && $product->sale_end_date->isFuture())
+            <div class="bg-gradient-to-r from-primary to-secondary text-white py-4" x-data="countdown('{{ $product->sale_end_date->toIso8601String() }}')">
+                <div class="container mx-auto px-4 text-center">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-fire text-orange-300"></i>
+                            <span class="font-medium">{{ __('app.limited-time-offer') }}</span>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-sm opacity-90">{{ __('app.ends-in') }}</span>
+                            <div class="flex gap-1">
+                                <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
+                                    <span :style="`--value:${days};`" x-text="days"></span>
+                                </div>
+                                <span class="text-xs self-center">d</span>
+                                <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
+                                    <span :style="`--value:${hours};`" x-text="hours"></span>
+                                </div>
+                                <span class="text-xs self-center">h</span>
+                                <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
+                                    <span :style="`--value:${minutes};`" x-text="minutes"></span>
+                                </div>
+                                <span class="text-xs self-center">m</span>
+                                <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
+                                    <span :style="`--value:${seconds};`" x-text="seconds"></span>
+                                </div>
+                                <span class="text-xs self-center">s</span>
                             </div>
-                            <span class="text-xs self-center">d</span>
-                            <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span :style="`--value:${hours};`" x-text="hours"></span>
-                            </div>
-                            <span class="text-xs self-center">h</span>
-                            <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span :style="`--value:${minutes};`" x-text="minutes"></span>
-                            </div>
-                            <span class="text-xs self-center">m</span>
-                            <div class="countdown font-mono text-sm bg-white/20 rounded px-2 py-1">
-                                <span :style="`--value:${seconds};`" x-text="seconds"></span>
-                            </div>
-                            <span class="text-xs self-center">s</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         @endif
 
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,7 +97,7 @@
                                 {{ $product->name }}
                             </h1>
                             <div class="mt-4 flex items-center gap-3">
-                                @if($product->sale_price)
+                                @if ($product->sale_price)
                                     <span class="text-xl text-gray-400 line-through">
                                         {{ $product->price->getAmount() }}
                                     </span>
@@ -217,11 +216,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    @if ($product->productQuestions->count() > 0)
-                        <div id="js-product-questions" class="card bg-base-100 shadow-sm border border-gray-200">
-                            <div class="card-body">
-                                <h3 class="text-xl font-medium mb-4 text-gray-800">{{ __('app.faqs') }}</h3>
+                    <div id="js-product-questions" class="card bg-base-100 shadow-sm border border-gray-200">
+                        <div class="card-body">
+                            <h3 class="text-xl font-medium mb-4 text-gray-800">{{ __('app.faqs') }}</h3>
 
+                            @if ($product->productQuestions->count() > 0)
                                 <div class="space-y-2">
                                     @foreach ($product->productQuestions as $question)
                                         <div class="collapse collapse-plus bg-gray-50 border border-gray-200">
@@ -236,20 +235,39 @@
                                                         {{ $question->answer ?? __('app.waiting-for-answer') }}
                                                     </p>
                                                     @if (!$question->answer)
-                                                        <button
-                                                            class="btn btn-sm btn-circle btn-ghost tooltip tooltip-left"
-                                                            data-tip="{{ __('app.notify-when-answered') }}">
-                                                            <i class="fas fa-bell text-primary"></i>
-                                                        </button>
+                                                        @php
+                                                            $disabled =
+                                                                $question->isCreatedByCurrentCustomer ||
+                                                                $question->isSubscribedByCurrentCustomer;
+                                                        @endphp
+                                                        <form
+                                                            data-tip="{{ $disabled ? __('app.you-will-be-notified') : __('app.notify-when-answered') }}"
+                                                            class="tooltip tooltip-left "
+                                                            action="{{ route('products.questions.subscribe', ['language' => app()->getLocale(), 'productQuestion' => $question->id]) }}"
+                                                            x-target="js-product-questions"
+                                                            method="POST">
+                                                            @csrf
+                                                            <button type="submit" @disabled($disabled)
+                                                                class="btn btn-sm btn-circle btn-ghost @if ($disabled) btn-disabled @endif"
+                                                                aria-disabled="@json($disabled)">
+                                                                <i
+                                                                    class="fas fa-bell @if (!$disabled) text-primary @endif"></i>
+                                                            </button>
+                                                        </form>
                                                     @endif
                                                 </div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                            </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <i class="fas fa-question-circle text-gray-300 text-4xl mb-4"></i>
+                                    <p class="text-gray-500">{{ __('app.no-questions-yet') }}</p>
+                                </div>
+                            @endif
                         </div>
-                    @endif
+                    </div>
 
                     <div class="card bg-base-100 shadow-sm border border-gray-200">
                         <div class="card-body">
@@ -307,11 +325,14 @@
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="flex flex-col items-start gap-2 md:flex-row md:items-center justify-between mb-2">
+                                    <div
+                                        class="flex flex-col items-start gap-2 md:flex-row md:items-center justify-between mb-2">
                                         <div class="flex flex-col items-start md:flex-row md:items-center gap-2">
-                                            <h4 class="font-medium text-gray-800">{{ $review->customer->user->name }}</h4>
+                                            <h4 class="font-medium text-gray-800">{{ $review->customer->user->name }}
+                                            </h4>
 
-                                            <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                            <span
+                                                class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
                                         </div>
 
                                         <div class="rating rating-sm">
@@ -401,10 +422,10 @@
             selector: '#TabbyPromo',
             currency: 'SAR', // Change to AED for UAE, KWD for Kuwait
             price: '{{ number_format($product->display_price->getAmount()->toFloat(), 2, '.', '') }}',
-            lang: '{{ app()->getLocale() === "ar" ? "ar" : "en" }}',
+            lang: '{{ app()->getLocale() === 'ar' ? 'ar' : 'en' }}',
             source: 'product',
-            publicKey: '{{ config("services.tabby.public_key") }}',
-            merchantCode: '{{ config("services.tabby.merchant_code", "NWSA") }}'
+            publicKey: '{{ config('services.tabby.public_key') }}',
+            merchantCode: '{{ config('services.tabby.merchant_code', 'NWSA') }}'
         });
 
         function countdown(expiry) {

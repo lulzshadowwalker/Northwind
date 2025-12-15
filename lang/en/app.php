@@ -249,4 +249,9 @@ return [
     'back-to-checkout' => '← Back to checkout',
     'payment-already-processed' => 'This payment has already been processed or is no longer valid.',
     'payment-form-load-error' => 'Unable to load payment form. Please try again.',
+
+    // Product Question Subscription
+    'must-be-logged-in-to-subscribe' => 'You must be logged in to subscribe to question answers.',
+    'you-will-be-notified' => 'You will be notified.',
+    'no-questions-yet' => 'No questions have been asked about this product yet.',
 ];

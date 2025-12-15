@@ -35,9 +35,5 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', function ($user) {
             return true;
         });
-
-        // if (!app()->environment("testing")) {
-        //     auth()->login(\App\Models\Customer::first()->user);
-        // }
     }
 }

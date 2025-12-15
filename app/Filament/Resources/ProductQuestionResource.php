@@ -70,25 +70,17 @@ class ProductQuestionResource extends Resource
                 Tables\Columns\TextColumn::make('product.name')
                     ->sortable()
                     ->searchable()
-                    ->limit(30)
-                    ->tooltip(fn (ProductQuestion $record) => $record->product->name),
-
+                    ->limit(30),
                 Tables\Columns\TextColumn::make('customer.user.name')
                     ->sortable()
                     ->searchable()
-                    ->limit(30)
-                    ->tooltip(fn (ProductQuestion $record) => $record->customer->user->name),
-
+                    ->limit(30),
                 Tables\Columns\TextColumn::make('question')
                     ->searchable()
-                    ->limit(40)
-                    ->tooltip(fn (ProductQuestion $record) => $record->question),
-
+                    ->limit(40),
                 Tables\Columns\TextColumn::make('answer')
                     ->searchable()
-                    ->limit(40)
-                    ->tooltip(fn (ProductQuestion $record) => $record->answer),
-
+                    ->limit(40),
                 Tables\Columns\IconColumn::make('is_answered')
                     ->label('Answered')
                     ->boolean()

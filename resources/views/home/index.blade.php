@@ -56,11 +56,15 @@
 
     <!-- Tabby Test Login -->
     @unless (app()->environment('production'))
-    <div style="position: fixed; bottom: 10px; left: 10px; z-index: 50; display: flex; flex-direction: column; gap: 0.8rem;">
-        <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'success') }}">Login as Tabby Success User</a>
-        <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'rejected') }}">Login as Tabby Rejected User</a>
-        <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'reject-phone') }}">Login as Tabby Pre-scoring Rejected User</a>
-    </div>
+        <div
+            style="position: fixed; bottom: 48px; left: 10px; z-index: 50; display: flex; flex-direction: column; gap: 0.8rem;">
+            <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'success') }}">Login as Tabby Success
+                User</a>
+            <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'rejected') }}">Login as Tabby
+                Rejected User</a>
+            <a class="btn btn-sm btn-error justify-start" href="{{ route('test-login', 'reject-phone') }}">Login as Tabby
+                Pre-scoring Rejected User</a>
+        </div>
     @endunless
 
     {{-- Collections --}}
@@ -94,9 +98,9 @@
                 @endif
             </section>
 
-            @if (!$loop->last && $loop->iteration <= 3)
+            @if (! $loop->last && $loop->iteration <= 3)
                 <div class="my-16">
-                    <x-banner-card :image="asset('assets/images/sample-' . ((($loop->iteration - 1) % 3) + 1) . '.webp')" />
+                    <x-banner-card :image="asset('assets/images/sample-'.((($loop->iteration - 1) % 3) + 1).'.webp')" />
                 </div>
             @endif
         @endforeach
